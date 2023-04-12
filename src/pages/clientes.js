@@ -200,7 +200,6 @@ function Dashboard() {
                   }
                   required
                   onChange={(event) => setNombre(event.target.value)}
-                  readonly
                 />
               </div>
               <div className="col-md-6">
