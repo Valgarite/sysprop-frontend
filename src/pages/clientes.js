@@ -1,7 +1,7 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
-import { DataFetching, DataPost } from "../DataFetching";
+import { DataFetching } from "../DataFetching";
 import "../assets/styles.scss";
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
@@ -9,6 +9,30 @@ import Cookies from "universal-cookie";
 const cookies = new Cookies()
 
 async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
+  if (!nombre || !cedula || !telefono || !direccion) {
+    alert("Todos los campos son obligatorios");
+    return;
+  }
+  if (cedula.length < 8 || cedula.length > 12) {
+    alert("Cedula Invalida");
+    return;
+  }
+  if (nombre.length < 3 || nombre.length > 64) {
+    alert("Nombre Invalido");
+    return;
+  }
+  if (telefono.length <= 10 || telefono.length >= 12) {
+    alert("Telefono Invalida");
+    return;
+  }
+  const clientes = await axios.get(ruta);
+  const clienteExistente = clientes.data.filter(
+    (cliente) => cliente.cedula === cedula
+  );
+  if (clienteExistente.length > 0) {
+    alert("Esta cedula ya se encuentra registrada.");
+    return;
+  }
   await axios
     .post(ruta, {
       nombre: nombre,
@@ -18,23 +42,41 @@ async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
     })
     .then((res) => console.log("posting data", res))
     .catch((err) => console.log(err));
+
   window.location.reload();
 }
 
 const eliminarCliente = async (id) => {
-  if (window.confirm("¿Está seguro de que desea eliminar este Cliente?")) {
+  if (window.confirm("¿Está seguro de que desea eliminar este usuario?")) {
     try {
       await axios.delete(
         `https://sysprop-production.up.railway.app/clientes/${id}`
       );
-      window.location.reload();
     } catch (error) {
       console.log(error);
     }
   }
+
+  window.location.reload();
 };
 
 const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
+  if (!nombre || !cedula || !telefono || !direccion) {
+    alert("Todos los campos son obligatorios");
+    return;
+  }
+  if (cedula.length < 8 || cedula.length > 12) {
+    alert("Cedula Invalida");
+    return;
+  }
+  if (nombre.length < 3 || nombre.length > 64) {
+    alert("Nombre Invalido");
+    return;
+  }
+  if (telefono.length <= 10 || telefono.length >= 12) {
+    alert("Telefono Invalida");
+    return;
+  }
   try {
     await axios.put(
       `https://sysprop-production.up.railway.app/clientes/${id}`,
@@ -45,10 +87,11 @@ const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
         direccion: direccion,
       }
     );
-    window.location.reload();
   } catch (error) {
     console.log(error);
   }
+
+  window.location.reload();
 };
 
 var editClienteId = -1;
@@ -73,17 +116,29 @@ function Clientes() {
     }
   }
 
-  var clienteIndex;   // Variable para almacenar el ID del cliente que se modificará
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsuarios = itemCliente.filter((user) => {
+    const fullName = `${user.nombre}${user.cedula}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  var clienteIndex; // Variable para almacenar el ID del cliente que se modificará
 
   function editarClick(id) {
     editClienteId = itemCliente[id].id;
     clienteIndex = id;
-    
+
     setNombre(itemCliente[clienteIndex].nombre);
     setCedula(itemCliente[clienteIndex].cedula);
     setTelefono(itemCliente[clienteIndex].telefono);
     setDireccion(itemCliente[clienteIndex].direccion);
-    
+
     handleEditar();
     handleShow();
   }
@@ -122,10 +177,62 @@ function Clientes() {
     },
   ];
 
+  /*************VALIDAR NOMBRE*******************/
+
+  const handleInputChange = (event) => {
+    const { value } = event.target;
+    const regex = /^[a-zñA-ZÑ\s]*$/;
+    if (regex.test(value) && value.length <= 64) {
+      setNombre(value);
+    } else if (!value) {
+      setNombre("");
+    }
+  };
+
+  /******************************************/
+  /*************VALIDAR CEDULA*******************/
+
+  const validarCedula = (event) => {
+    const { value } = event.target;
+    const regex = /^[0-9]*$/;
+    if (regex.test(value) && value.length <= 12) {
+      setCedula(value);
+    } else if (!value) {
+      setCedula("");
+    }
+  };
+
+  /******************************************/
+  /*************VALIDAR TELEFONO*******************/
+
+  const validarTelefono = (event) => {
+    const { value } = event.target;
+    const regex = /^[0-9]*$/;
+    if (regex.test(value) && value.length <= 11) {
+      setTelefono(value);
+    } else if (!value) {
+      setTelefono("");
+    }
+  };
+
+  /******************************************/
+
+  /*************VALIDAR DIRECCION**********/
+  const ValidarDireccion = (event) => {
+    const { value } = event.target;
+    const regex = /^[a-zñA-ZÑ,.0-9()-\s]*$/;
+    if (regex.test(value) && value.length <= 120) {
+      setDireccion(value);
+    } else if (!value) {
+      setDireccion("");
+    }
+  };
+  /******************************************/
+
   return (
-    <>
-    <Sidebar/>
     <div>
+    <Sidebar/>
+    
       {/* <!--CUERPO--> */}
       <div id="cuerpo">
         <div className="row p-4">
@@ -134,7 +241,9 @@ function Clientes() {
             <input
               type="text"
               className="form-control"
-              placeholder="Buscar cliente..."
+              value={searchQuery}
+              onChange={handleSearch}
+              placeholder="Buscar Cliente..."
             />
           </div>
           <div className="col-3"></div>
@@ -161,9 +270,15 @@ function Clientes() {
               </tr>
             </thead>
             <tbody>
-              {itemCliente.map((itemCliente, id) => (
+              {filteredUsuarios.map((itemCliente, id) => (
                 <tr key={id}>
-                  <td>{itemCliente.id}</td>
+                  <td
+                    className={
+                      itemCliente.estado_activo ? "activo" : "desactivo"
+                    }
+                  >
+                    {itemCliente.id}
+                  </td>
                   <td>{itemCliente.nombre}</td>
                   <td>{itemCliente.cedula}</td>
                   <td>{itemCliente.telefono}</td>
@@ -211,11 +326,13 @@ function Clientes() {
                   type="text"
                   className="form-control"
                   id="nombre"
-                  defaultValue={
-                    action === 1 ? null : nombre
-                  }
+                  defaultValue={action === 1 ? null : nombre}
+                  value={nombre}
                   required
-                  onChange={(event) => setNombre(event.target.value)}
+                  //onChange={(event) => setNombre(event.target.value)}
+                  onChange={handleInputChange}
+                  readonly
+                  minLength={3}
                 />
               </div>
               <div className="col-md-6">
@@ -226,11 +343,13 @@ function Clientes() {
                   type="text"
                   className="form-control"
                   id="cedula"
-                  defaultValue={
-                    action === 1 ? "" : cedula
-                  }
-                  onChange={(event) => setCedula(event.target.value)}
+                  defaultValue={action === 1 ? "" : cedula}
+                  value={cedula}
+                  //onChange={(event) => setCedula(event.target.value)}
+                  onChange={validarCedula}
                   required
+                  // maxLength={8}
+                  minLength={8}
                 />
               </div>
               <div className="col-md-6">
@@ -241,10 +360,10 @@ function Clientes() {
                   type="text"
                   className="form-control"
                   id="telefono"
-                  defaultValue={
-                    action === 1 ? "" : telefono
-                  }
-                  onChange={(event) => setTelefono(event.target.value)}
+                  defaultValue={action === 1 ? "" : telefono}
+                  value={telefono}
+                  //onChange={(event) => setTelefono(event.target.value)}
+                  onChange={validarTelefono}
                   required
                 />
               </div>
@@ -255,19 +374,52 @@ function Clientes() {
                 <textarea
                   className="form-control"
                   id="direccion"
-                  defaultValue={
-                    action === 1 ? "" : direccion
-                  }
-                  onChange={(event) => setDireccion(event.target.value)}
+                  defaultValue={action === 1 ? "" : direccion}
+                  value={direccion}
+                  //onChange={(event) => setDireccion(event.target.value)}
+                  onChange={ValidarDireccion}
                   required
                 ></textarea>
               </div>
             </div>
             {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
+            {action === 1 ? (
+              <button
+                id="agregar"
+                type="button"
+                onClick={() =>
+                  agregarCliente(
+                    "https://sysprop-production.up.railway.app/clientes",
+                    nombre,
+                    cedula,
+                    telefono,
+                    direccion
+                  )
+                }
+                className="btn btn-primary"
+              >
+                Agregar
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => {
+                  editarCliente(
+                    editClienteId,
+                    nombre,
+                    cedula,
+                    telefono,
+                    direccion
+                  );
+                }}
+              >
+                Guardar cambios
+              </button>
+            )}
           </form>
-        </Modal.Body>
-        <Modal.Footer>
           <button
+            id="cerrar"
             type="button"
             className="btn btn-secondary"
             data-bs-dismiss="modal"
@@ -275,43 +427,9 @@ function Clientes() {
           >
             Cerrar
           </button>
-          {action === 1 ? (
-            <button
-              type="submit"
-              onClick={() =>
-                agregarCliente(
-                  "https://sysprop-production.up.railway.app/clientes",
-                  nombre,
-                  cedula,
-                  telefono,
-                  direccion
-                )
-              }
-              className="btn btn-primary"
-            >
-              Agregar
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="btn btn-success"
-              onClick={() => {
-                editarCliente(
-                  editClienteId,
-                  nombre,
-                  cedula,
-                  telefono,
-                  direccion
-                );
-              }}
-            >
-              Guardar cambios
-            </button>
-          )}
-        </Modal.Footer>
+        </Modal.Body>
       </Modal>
     </div>
-    </>
   );
 }
 

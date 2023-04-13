@@ -5,7 +5,6 @@ import icon2 from "../assets/images/user-icon-2.png"
 import icon1 from "../assets/images/user-icon-1.png"
 import icon3 from "../assets/images/user-icon-gt.png"
 import iconDef from "../assets/images/user-default.png"
-import { render } from "@testing-library/react";
 
 const cookies = new Cookies()
 
@@ -19,46 +18,55 @@ const Sidebar = () => {
 			text: "Inicio",
 			icon: "bx bx-collection",
 			path: "/dashboard",
+			minUserLevel: 1,
 		},
 		{
 			text: "Compras",
 			icon: "bx bx-collection",
 			path: "/Compras",
+			minUserLevel: 2
 		},
 		{
 			text: "Ventas",
 			icon: "sbx bx-book-alt",
 			path: "/ventas",
+			minUserLevel: 1
 		},
 		{
 			text: "Clientes",
 			icon: "bx bx-book-alt",
 			path: "/clientes",
+			minUserLevel: 1
 		},
 		{
 			text: "Proveedores",
 			icon: "bx bx-line-chart",
 			path: "/proveedores",
+			minUserLevel: 2
 		},
 		{
 			text: "Inventario",
 			icon: "bx bx-plug",
 			path: "/inventario",
+			minUserLevel: 2
 		},
 		{
 			text: "Usuarios",
 			icon: "bx bx-compass",
 			path: "/usuarios",
+			minUserLevel: 3
 		},
 		{
 			text: "Mantenimiento",
 			icon: "bx bx-history",
 			path: "/mantenimiento",
+			minUserLevel: 3
 		},
 		{
 			text: "Ayuda",
 			icon: "bx bx-history",
 			path: "/ayuda",
+			minUserLevel: 1
 		},
 	];
 
@@ -139,7 +147,8 @@ const Sidebar = () => {
 					</button>
 				</div>
 				<div className="nav-menu">
-					{menuItems.map(({ text, icon, path }) => (
+					{menuItems.map(({ text, icon, path, minUserLevel }) => (
+						(userData.idCargo >= minUserLevel) &&
 						<Link
 							className={isExpanded ? "menu-item" : "menu-item menu-item-NX"}
 							to={path}
@@ -168,7 +177,7 @@ const Sidebar = () => {
 						</div>
 					</div>
 				)}
-				<Link className="logout-link" onClick={cerrarSesion}>
+				<Link to="/login" className="logout-link" onClick={cerrarSesion}>
 					<img className="logout-icon" src="icons/logout.svg" alt="" srcset="" />
 				</Link>
 			</div>

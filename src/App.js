@@ -5,10 +5,7 @@ import {
   Switch,
 } from 'react-router-dom'
 import routes from './routes/routes';
-import Cookies from 'universal-cookie/cjs/Cookies';
-
-//Obtener data de APIs:
-import DataFetching from "./DataFetching"
+import Dashboard from './pages/dashboard';
 
 // authState = () => {
 //   cookies.get('id') ? alert("AUTENTICADO") : alert("NEGATIVO") 
@@ -23,6 +20,7 @@ function App() {
         <Switch>
           {routes.map((route) => (<Route key={route.path} path={route.path} component={route.component}/>)
           )}
+          <Route path="/" component={Dashboard}/>
         </Switch>
       </Router>
     </React.Fragment>

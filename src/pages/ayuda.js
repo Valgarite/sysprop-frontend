@@ -14,20 +14,20 @@ function Faq() {
 
   const faqs = [
     {
-      question: '¿Cómo puedo realizar una compra?',
-      answer: 'Para realizar una compra, debe seguir los siguientes pasos: 1. Inicie sesión en su cuenta, 2. Seleccione los productos que desea comprar, 3. Haga clic en el botón "Comprar", 4. Seleccione su método de pago y complete la información necesaria, 5. Confirme la compra. Si tiene algún problema durante el proceso, no dude en contactarnos.',
+      question: '¿Cómo agregar un nuevo cliente?',
+      answer: 'Para agregar un nuevo cliente, haz clic en la pestaña "Clientes" en la barra lateral. Luego, haz clic en el botón "Agregar cliente" y completa el formulario con el nombre, cédula, teléfono y dirección del nuevo cliente. Haz clic en el botón "Guardar" para agregar el cliente a la lista.',
     },
     {
-      question: '¿Cuánto tiempo tardará mi pedido en llegar?',
-      answer: 'El tiempo de entrega de su pedido depende del método de envío que haya seleccionado. Si selecciona el envío estándar, el tiempo de entrega estimado es de 3 a 5 días hábiles. Si selecciona el envío express, el tiempo de entrega estimado es de 1 a 2 días hábiles. Tenga en cuenta que estos son tiempos estimados y pueden variar dependiendo de su ubicación y otras circunstancias externas.',
+      question: '¿Cómo agregar un nuevo usuario?',
+      answer: 'Para agregar un nuevo usuario, haz clic en la pestaña "Usuarios" en la barra lateral. Luego, haz clic en el botón "Agregar usuario" y completa el formulario con el nombre, cédula, fecha de nacimiento, username, password y cargo del nuevo usuario. Haz clic en el botón "Agregar usuario" para agregar el usuario a la lista.',
     },
     {
-      question: '¿Cómo puedo hacer un seguimiento de mi pedido?',
-      answer: 'Para hacer un seguimiento de su pedido, debe iniciar sesión en su cuenta y buscar la opción "Seguimiento de pedidos". Allí encontrará toda la información necesaria sobre el estado de su pedido y el número de seguimiento correspondiente.',
+      question: '¿Cómo agregar un nuevo producto al inventario?',
+      answer: 'Para agregar un nuevo producto al inventario, haz clic en la pestaña "Inventario" en la barra lateral. Luego, haz clic en el botón "Agregar producto" y completa el formulario con el nombre, código, categoría, precio y cantidad del nuevo producto. Haz clic en el botón "Agregar producto" para agregar el producto al inventario.',
     },
     {
-      question: '¿Puedo cancelar mi pedido después de haberlo realizado?',
-      answer: 'Sí, puede cancelar su pedido antes de que sea enviado. Para hacerlo, debe contactarnos lo antes posible y proporcionar la información necesaria sobre su pedido. Si el pedido ya ha sido enviado, no podremos cancelarlo.',
+      question: '¿Cómo crear una nueva factura de venta?',
+      answer: 'Para crear una nueva factura de venta, haz clic en la pestaña "Ventas" en la barra lateral. Luego, selecciona el cliente de la factura en la pestaña "Agregar Cliente" ingresando su nombre y cédula. En la pestaña "Agregar Productos", selecciona los productos que deseas vender y completa la cantidad. Los detalles de los productos seleccionados se mostrarán en la tabla con el precio y el total. En la pestaña "Monto total" se mostrará el monto total de la factura. Haz clic en el botón "Guardar" para crear la factura de venta.',
     },
   ];
 

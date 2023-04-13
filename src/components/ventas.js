@@ -79,15 +79,15 @@ function Ventas() {
   const [subtotal, setSubtotal] = useState(0);
   const [igv, setIgv] = useState(0);
   const [total, setTotal] = useState(0);
-  const [showModal, setShowModal] = useState(false)
+  const [showModal, setShowModal] = useState(0)
   const [nombre, setNombre] = useState("");
   const [cedula, setCedula] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
   
-  const handleModalSeleccionar = () => setShowModal(true);
+  const handleModalSeleccionar = () => setShowModal(1);
   const handleModalAgregar = () => setShowModal(2);
-  const closeModal = () => setShowModal(false);
+  const closeModal = () => setShowModal(0);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
@@ -460,7 +460,7 @@ function Ventas() {
 
           
         </div>
-        <Modal show={showModal} onHide={closeModal} className="Modal-SeleccionarCliente" >
+        <Modal show={(showModal===1) && true} onHide={(showModal!==1) && true} className="Modal-SeleccionarCliente" >
         <Modal.Header closeButton>
           <Modal.Title>
             Lista de Clientes
@@ -582,7 +582,7 @@ function Ventas() {
         </Modal>
 
 
-        {/* MODAL DE AGREGAR NUEVO USUARIO */}
+        {/* MODAL DE AGREGAR NUEVO USUARIO MAMAWEBO DIGO GLULGU */}
         <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
@@ -708,8 +708,6 @@ function Ventas() {
   );
 }
 
-export default Ventas
-
 //id cliente
 //total
 
@@ -720,3 +718,5 @@ function subTotal(productos) {
   }
   return suma;
 }
+
+export default Ventas;
