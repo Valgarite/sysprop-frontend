@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import { DataFetching } from "../DataFetching";
+import Sidebar from "../components/sidebar";
 import "../assets/styles.scss";
 
-
 function agregarUsuario(ruta, nombre, cantidad, precio, correo) {
-  console.log("1");
   axios
     .post(ruta, {
       nombre: nombre,
@@ -18,18 +17,32 @@ function agregarUsuario(ruta, nombre, cantidad, precio, correo) {
     .catch((err) => console.log(err));
 }
 
-function eliminarUsuario() {}
+const eliminarUsuario = async (id) =>  {
+  if (window.confirm("¿Está seguro de que desea eliminar este usuario?")) {
+    try {
+      await axios.delete(
+        `https://sysprop-production.up.railway.app/usuarios/${id}`
+      );
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 function editarUsuario() {}
 
 function Usuarios() {
   
-  const itemUsuario = DataFetching("/Usuarios");
+  const itemUsuario = DataFetching("https://sysprop-production.up.railway.app/usuarios");
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   return (
+    <>
+    <Sidebar/>
     <div>
       {/* <!--CUERPO--> */}
       <div id="cuerpo">
@@ -76,15 +89,14 @@ function Usuarios() {
                   <td>{itemUsuario.id}</td>
                   <td>{itemUsuario.nombre}</td>
                   <td>{itemUsuario.cedula}</td>
-                  <td>{itemUsuario.fdn}</td>
                   <td>{itemUsuario.correo}</td>
                   <td>{itemUsuario.username}</td>
-                  <td>{itemUsuario.contraseña}</td>
-                  <td>{itemUsuario.cargo}</td>
+                  <td>{itemUsuario.fechaNacimiento}</td>
+                  <td>{itemUsuario.estado_activo}</td>
                   <td>
                     <button
                       className="btn btn-danger"
-                      onClick={eliminarUsuario(itemUsuario.id)}
+                      onClick={()=> eliminarUsuario(itemUsuario.id)}
                     >
                       Eliminar
                     </button>
@@ -227,6 +239,7 @@ function Usuarios() {
         </Modal.Footer>
       </Modal>
     </div>
+  </>
   );
 }
 

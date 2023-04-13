@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios'
 import Modal from 'react-bootstrap/Modal';
 import { DataFetching } from '../DataFetching';
+import Sidebar from '../components/sidebar';
 import '../assets/styles.scss'
 
 function agregarArticulo(ruta, nombre, cantidad, precio, categoria){
@@ -29,8 +30,9 @@ function Inventario() {
   const handleShow = () => setShow(true);
 
   return (
+    <>
+    <Sidebar/>
     <div>
-
     {/* <!--CUERPO--> */}
     <div id="cuerpo">
       <div className="m-4 row">
@@ -145,6 +147,7 @@ function Inventario() {
         </Modal.Footer>
       </Modal>
     </div>
+  </>
   )
 }
 

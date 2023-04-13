@@ -13,9 +13,12 @@ import {
   Table,
   Button,
 } from "reactstrap";
+import Sidebar from "../components/sidebar";
 
-function ventas() {
+function Ventas() {
   return (
+    <>
+    <Sidebar/>
     <div>
       <div id="cuerpo">
         <Row>
@@ -165,7 +168,8 @@ function ventas() {
         </Row>
       </div>
     </div>
+    </>
   );
 }
 
-export default ventas;
+export default Ventas;

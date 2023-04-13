@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import { DataFetching, DataPost } from "../DataFetching";
 import "../assets/styles.scss";
+import Sidebar from "../components/sidebar";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies()
 
 async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
   await axios
@@ -18,7 +22,7 @@ async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
 }
 
 const eliminarCliente = async (id) => {
-  if (window.confirm("¿Está seguro de que desea eliminar este usuario?")) {
+  if (window.confirm("¿Está seguro de que desea eliminar este Cliente?")) {
     try {
       await axios.delete(
         `https://sysprop-production.up.railway.app/clientes/${id}`
@@ -49,7 +53,7 @@ const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
 
 var editClienteId = -1;
 
-function Dashboard() {
+function Clientes() {
   const itemCliente = DataFetching(
     "https://sysprop-production.up.railway.app/clientes"
   );
@@ -62,6 +66,12 @@ function Dashboard() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const Redireccion = () => {
+    if(!cookies.get('id')){
+      window.location.href="/login"
+    }
+  }
 
   var clienteIndex;   // Variable para almacenar el ID del cliente que se modificará
 
@@ -82,6 +92,10 @@ function Dashboard() {
     handleAgregar();
     handleShow();
   }
+
+  useEffect(()=>{
+    Redireccion()
+  },[])
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
@@ -109,6 +123,8 @@ function Dashboard() {
   ];
 
   return (
+    <>
+    <Sidebar/>
     <div>
       {/* <!--CUERPO--> */}
       <div id="cuerpo">
@@ -295,7 +311,8 @@ function Dashboard() {
         </Modal.Footer>
       </Modal>
     </div>
+    </>
   );
 }
 
-export default Dashboard;
+export default Clientes;

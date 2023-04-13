@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Sidebar from '../components/sidebar';
 
 function Faq() {
   const [visibleAnswer, setVisibleAnswer] = useState(null);
@@ -31,7 +32,9 @@ function Faq() {
   ];
 
   return (
-    <div id="cuerpoAyuda">
+    <>
+      <Sidebar/>
+      <div id="cuerpoAyuda">
     <div  className="container">
       <h1>Preguntas frecuentes</h1>
       {faqs.map((faq, index) => (
@@ -45,7 +48,8 @@ function Faq() {
         </div>
       ))}
     </div>
-  </div>
+      </div>
+    </>
   );
 }
 

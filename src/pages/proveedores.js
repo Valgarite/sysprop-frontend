@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios'
 import Modal from 'react-bootstrap/Modal';
 import { DataFetching } from '../DataFetching';
+import Sidebar from '../components/sidebar';
 import '../assets/styles.scss'
 
 function agregarCliente(ruta, nombre, apellido, cedula, telefono, direccion){
@@ -22,7 +23,7 @@ function editarCliente(){
 
 }
 
-function Dashboard() {
+function Proveedores() {
   const itemCliente = DataFetching("/clientes")
   const [show, setShow] = useState(false);
 
@@ -30,9 +31,9 @@ function Dashboard() {
   const handleShow = () => setShow(true);
 
   return (
-    <div>
-
-    {/* <!--CUERPO--> */}
+    <>
+      <Sidebar/>
+      <div>
     <div id="cuerpo">
       <div className="m-4 row">
         <h3>Buscar Proveedor</h3>
@@ -156,8 +157,9 @@ function Dashboard() {
             </button>
         </Modal.Footer>
       </Modal>
-    </div>
+      </div>
+    </>
   )
 }
 
-export default Dashboard
+export default Proveedores

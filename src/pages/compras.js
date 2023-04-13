@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input } from 'reactstrap';
+import Sidebar from '../components/sidebar';
 
 async function fetchUsers(searchTerm = '') {
   try {
@@ -11,7 +12,7 @@ async function fetchUsers(searchTerm = '') {
   }
 }
 
-function App() {
+function Compras() {
   const [users, setUsers] = useState([]);
   const [modal, setModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', username: '', email: '', phone: '' });
@@ -119,6 +120,8 @@ function App() {
   
 
   return (
+    <>
+    <Sidebar/>
     <div className="container">
       <div className="col-md-6 text-md-right">
       <h2>Lista de Usuarios</h2>
@@ -194,6 +197,7 @@ function App() {
       </tbody>
     </Table>
   </div>
+  </>
 );
 }
-export default App;
+export default Compras;

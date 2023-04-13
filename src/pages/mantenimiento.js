@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Col, Row } from 'reactstrap';
+import Sidebar from '../components/sidebar';
 
 function MaintenanceTab() {
   const [backupMessage, setBackupMessage] = useState('');
@@ -16,7 +17,9 @@ function MaintenanceTab() {
   }
 
   return (
-    <div id="cuerpo" className="maintenance-tab">
+    <>
+      <Sidebar/>
+      <div id="cuerpo" className="maintenance-tab">
       <h2>Mantenimiento</h2>
       <div id="cuadroMantenimiento">
       <Row>
@@ -30,7 +33,8 @@ function MaintenanceTab() {
         </Col>
       </Row>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

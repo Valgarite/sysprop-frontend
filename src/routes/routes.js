@@ -7,8 +7,14 @@ import usuarios from "../pages/usuarios";
 import inventario from "../pages/inventario";
 import proveedores from "../pages/proveedores";
 import mantenimiento from "../pages/mantenimiento";
+import { Login } from "../pages/Login";
 
 const routes = [
+    {
+      title: 'Login',
+      path: '/login',
+      component: Login,
+    },
     {
       title: 'Dashboard',
       path: '/dashboard',

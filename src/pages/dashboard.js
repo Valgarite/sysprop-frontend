@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState , Component } from "react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -10,6 +10,10 @@ import {
   Title,
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
+import Sidebar from "../components/sidebar";
+import Cookies from "universal-cookie/cjs/Cookies";
+
+const cookies = new Cookies();
 
 ChartJS.register(
   ArcElement,
@@ -127,9 +131,18 @@ const DashBoard = () => {
   };
   useEffect(() => {
     obtenerConfiguracion();
+    Redireccion()
   }, []);
+  
+  const Redireccion = () => {
+    if(!cookies.get('id')){
+      window.location.href="/login"
+    }
+  }
 
   return (
+    <>
+    <Sidebar/>
     <div className="cuerpoDashboard">
       <div className="row">
         <div className="col-xl-3 col-md-6 mb-4">
@@ -254,6 +267,7 @@ const DashBoard = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

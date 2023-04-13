@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@200;300;400&display=swap');
+
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    
+    font-family: 'Mulish', sans-serif;
+    background-image: url("./images/fotor_2023-2-5_22_39_14.png") ;
+    background-repeat: no-repeat;
+    background-size: 100%;      
+
+    .form-body {
+        font-family: 'Mulish', sans-serif;
+    
+        width: 571px;
+        min-width: 600px;
+        height: 518px;
+        border-radius: 10px;
+        border-top-left-radius: 50px;
+        border-bottom-right-radius: 50px;
+        border: solid 5px #FA7DA2;
+        margin: 10px;
+        position: absolute;
+        background: #F7F1E5;
+        border-radius: 12px;
+        
+        img {
+            width: 150px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .text {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: black;
+            margin-bottom: 25px;
+        }
+        
+        input {
+            display: block;
+            margin: auto;
+            height: 40px;
+            width: 75%;
+            padding-left: 10px;
+            color: black;
+            border: 1px solid black;
+            border-radius: 2px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            background-color: rgb(198, 184, 201);
+            border-top-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="password"] {
+            margin-top: 20px;
+        }
+        
+        input:hover {
+            transition: .1s;
+            border: 3px solid #ecbde0;
+            color: #5a0645;
+        }
+
+        .login-form {
+
+            button {
+                display: block;
+                margin: auto;
+                margin-top: 25px;
+                margin-bottom: 30px;
+                height: 40px;
+                width: 35%;
+                background: #FA7DA2;
+                color: black;
+                cursor: pointer;
+                outline: none;
+                border: 2px solid aliceblue;
+                transition:  all .4s ease;
+                text-decoration: none;
+                
+            }
+
+            button:hover {
+                color: black;
+                border: solid 5px rgb(214, 183, 240);
+                background: #ac6ee7;
+            }
+
+            a {
+                text-decoration: none;
+                color: black;
+            }
+        }
+    }
+}
+
+::placeholder {
+    font-size: 1rem;
+    color: rgba(75, 75, 75, 0.747);
+}

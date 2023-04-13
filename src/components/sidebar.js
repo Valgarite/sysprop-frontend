@@ -1,8 +1,19 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { Link } from "react-router-dom";
+import Cookies from "universal-cookie/cjs/Cookies";
+import icon2 from "../assets/images/user-icon-2.png"
+import icon1 from "../assets/images/user-icon-1.png"
+import icon3 from "../assets/images/user-icon-gt.png"
+import iconDef from "../assets/images/user-default.png"
+import { render } from "@testing-library/react";
 
-const SideBar = () => {
+const cookies = new Cookies()
+
+const Sidebar = () => {
 	const [isExpanded, setExpendState] = useState(true);
+	const [isUserAuthenticated, setUserState] = useState(false)
+	const [userIcon, setUserIcon] = useState(iconDef)
+
 	const menuItems = [
 		{
 			text: "Inicio",
@@ -50,8 +61,56 @@ const SideBar = () => {
 			path: "/ayuda",
 		},
 	];
+
+	const [userData, setUserData] = useState({
+		username: "userexample",
+		nombre: "Nombre Apellido",
+		idCargo: 0,
+		cargo: "Cargo",
+		icon: icon2
+	})
+
+	const cerrarSesion = () => {
+		cookies.remove('id', {path: "/"})
+		window.location.href="/dashboard"
+	}
+
+	async function renderUserData(){
+		if(cookies.get('id')) {
+			setUserState(true)
+			
+			setUserData({
+				nombre: cookies.get('nombre'),
+				username: cookies.get('username'),
+				cargo: cookies.get('cargo').nombre,
+				idCargo: cookies.get('cargo').id
+			})
+			cookies.set('idCargo', userData.idCargo, {path: "/"})
+			
+			switch(userData.idCargo){
+				case 1:
+					setUserIcon(icon1)
+					break;
+				case 2:
+					setUserIcon(icon2)
+					break;
+				case 3:
+					setUserIcon(icon3)
+					break;
+				default:
+					setUserIcon(iconDef)
+				break;
+			}
+		}
+	}
+	
+	useEffect(() => {
+		renderUserData()
+	}, [document.getElementById("sidebar")]);
+
 	return (
 		<div
+			id="sidebar"
 			className={
 				isExpanded
 					? "side-nav-container"
@@ -63,7 +122,9 @@ const SideBar = () => {
 					{isExpanded && (
 						<div className="nav-brand">
 							<img src="icons/Logo.svg" alt="Logo" srcset="" />
-							<h2 className="nav-brand-title">SysProp Gelato</h2>
+							<h2 className="nav-brand-title">
+								<Link className="nav-title-link" to="/dashboard">SysProp Gelato</Link>
+							</h2>
 						</div>
 					)}
 					<button
@@ -94,17 +155,20 @@ const SideBar = () => {
 					<div className="nav-details">
 						<img
 							className="nav-footer-avatar"
-							src="icons/admin-avatar.svg"
+							src={userIcon}
 							alt="Usuario"
-							srcset=""
 						/>
 						<div className="nav-footer-info">
-							<p className="nav-footer-user-name">Julio Pacheco</p>
-							<p className="nav-footer-user-position">Administrador</p>
+							<p className="nav-footer-user-name">
+								{ isUserAuthenticated ? userData.nombre : "Usuario Actual" }
+							</p>
+							<p className="nav-footer-user-position">
+								{ isUserAuthenticated ? userData.cargo : "Cargo" }
+							</p>
 						</div>
 					</div>
 				)}
-				<Link to = "/" className="logout-link">
+				<Link className="logout-link" onClick={cerrarSesion}>
 					<img className="logout-icon" src="icons/logout.svg" alt="" srcset="" />
 				</Link>
 			</div>
@@ -112,4 +176,4 @@ const SideBar = () => {
 	);
 };
 
-export default SideBar;
+export default Sidebar;
