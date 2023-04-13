@@ -1,4 +1,4 @@
-import { useEffect, useState , Component } from "react";
+import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -236,6 +236,8 @@ const DashBoard = () => {
           </div>
         </div>
       </div>
+
+
       <div className="row">
         <div className="col-xl-8 col-lg-7">
           <div className="card shadow mb-4">
@@ -266,6 +268,7 @@ const DashBoard = () => {
           </div>
         </div>
       </div>
+      
     </div>
     </>
   );

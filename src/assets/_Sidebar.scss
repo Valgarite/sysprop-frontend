@@ -167,6 +167,8 @@
 }
 .menu-item:hover {
   background-color: var(--primary);
+  color: white;
+  transition: 0.2s;
 }
 .menu-item img {
   width: 25px; 
