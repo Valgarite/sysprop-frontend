@@ -2,43 +2,225 @@ import React, { useState } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import { DataFetching } from "../DataFetching";
-import Sidebar from "../components/sidebar";
 import "../assets/styles.scss";
+import Sidebar from "../components/sidebar";
 
-function agregarUsuario(ruta, nombre, cantidad, precio, correo) {
-  axios
+async function agregarUsuario(ruta, nombre, cedula, fechaNacimiento, correo, username, password, cargo) {
+  if (!nombre || !cedula || !correo || !username || !password) {
+    alert("Todos los campos son obligatorios");
+    return;
+  }
+  if (cedula.length < 8 || cedula.length > 12) {
+    alert("Cedula Invalida");
+    return;
+  }
+  if (nombre.length < 3 || nombre.length > 64) {
+    alert("Nombre Invalido");
+    return;
+  }
+ 
+  if (username.length < 6 || username.length >= 12) {
+    alert("Username Invalido");
+    return;
+  }
+  if (password.length < 8 || password.length >= 17) {
+    alert("Password Invalido");
+    return;
+  }
+  const clientes = await axios.get(ruta);
+  const clienteExistente = clientes.data.filter(
+    (cliente) => cliente.cedula === cedula
+  );
+  if (clienteExistente.length > 0) {
+    alert("Esta cedula ya se encuentra registrada.");
+    return;
+  }
+  const user = await axios.get(ruta);
+  const usernameExistente = clientes.data.filter(
+    (user) => clientes.user === username
+  );
+  if (usernameExistente.length > 0) {
+    alert("Esta nombre de usuario ya esta registrado.");
+    return;
+  }
+  await axios
     .post(ruta, {
-      nombre: nombre,
-      cantidad: cantidad,
-      precio: precio,
-      correo: correo,
+      nombre,
+      cedula,
+      fechaNacimiento,
+      correo,
+      username,
+      password,
+      cargo,
     })
     .then((res) => console.log("posting data", res))
     .catch((err) => console.log(err));
+
+  window.location.reload();
 }
 
-const eliminarUsuario = async (id) =>  {
+const eliminarUsuario = async (id) => {
   if (window.confirm("¿Está seguro de que desea eliminar este usuario?")) {
     try {
       await axios.delete(
         `https://sysprop-production.up.railway.app/usuarios/${id}`
       );
-      window.location.reload();
     } catch (error) {
       console.log(error);
     }
   }
-}
 
-function editarUsuario() {}
+  window.location.reload();
+};
+
+const editarCliente = async (id, nombre, cedula, fechaNacimiento, correo, username, password, cargo) => {
+  if (!nombre || !cedula) {
+    alert("Todos los campos son obligatorios");
+    return;
+  }
+  if (cedula.length < 8 || cedula.length > 12) {
+    alert("Cedula Invalida");
+    return;
+  }
+  if (nombre.length < 3 || nombre.length > 64) {
+    alert("Nombre Invalido");
+    return;
+  }
+  try {
+    await axios.put(
+      `https://sysprop-production.up.railway.app/usuarios/${id}`,
+      {
+        nombre: nombre,
+        cedula: cedula,
+        fechaNacimiento: fechaNacimiento,
+        correo: correo,
+        username: username,
+        password: password,
+        cargo: cargo,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+
+  window.location.reload();
+};
+
+var editClienteId = -1;
 
 function Usuarios() {
-  
-  const itemUsuario = DataFetching("https://sysprop-production.up.railway.app/usuarios");
+  const itemCliente = DataFetching(
+    "https://sysprop-production.up.railway.app/usuarios"
+  );
+
   const [show, setShow] = useState(false);
+
+  const [nombre, setNombre] = useState("");
+  const [cedula, setCedula] = useState("");
+  const [fechaNacimiento, setFechanacimiento] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [cargo, setCargo] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsuarios = itemCliente.filter((user) => {
+    const fullName = `${user.nombre}${user.cedula}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  var clienteIndex; // Variable para almacenar el ID del cliente que se modificará
+
+  function editarClick(id) {
+    editClienteId = itemCliente[id].id;
+    clienteIndex = id;
+
+      setNombre(itemCliente[clienteIndex].nombre);
+      setCedula(itemCliente[clienteIndex].cedula);
+      setFechanacimiento(itemCliente[clienteIndex].fechaNacimiento);
+      setCorreo(itemCliente[clienteIndex].correo);
+      setUsername(itemCliente[clienteIndex].username);
+      setPassword(itemCliente[clienteIndex].password);
+      setCargo(itemCliente[clienteIndex].cargo.nombre);
+    
+    
+
+    handleEditar();
+    handleShow();
+  }
+
+  function agregarClick() {
+    handleAgregar();
+    handleShow();
+  }
+
+  const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
+  const handleAgregar = () => setAction(1);
+  const handleEditar = () => setAction(2); // El estado 2 define que el Modal será utilizado para Modificar un cliente existente
+
+  const camposDataClientes = [
+    {
+      column: "ID",
+    },
+    {
+      column: "Nombre",
+    },
+    {
+      column: "Cédula",
+    },
+    {
+      column: "Correo",
+    },
+    {
+      column: "Fecha Nacimiento",
+    },
+    {
+      column: "Username",
+    },
+    {
+      column: "Cargo",
+    },
+    {
+      column: "Acciones",
+    },
+  ];
+
+  /*************VALIDAR NOMBRE*******************/
+
+  const handleInputChange = (event) => {
+    const { value } = event.target;
+    const regex = /^[a-zñA-ZÑ\s]*$/;
+    if (regex.test(value) && value.length <= 64) {
+      setNombre(value);
+    } else if (!value) {
+      setNombre("");
+    }
+  };
+
+  /******************************************/
+  /*************VALIDAR CEDULA*******************/
+
+  const validarCedula = (event) => {
+    const { value } = event.target;
+    const regex = /^[0-9]*$/;
+    if (regex.test(value) && value.length <= 12) {
+      setCedula(value);
+    } else if (!value) {
+      setCedula("");
+    }
+  };
+
+  /******************************************/
+  /*************VALIDAR TELEFONO*******************/
+
 
   return (
     <>
@@ -46,12 +228,14 @@ function Usuarios() {
     <div>
       {/* <!--CUERPO--> */}
       <div id="cuerpo">
-        <div className="m-4 row">
-          <h3>Usuarios</h3>
+        <div className="row p-4">
+          <h3>Buscar Usuario</h3>
           <div className="col-6">
             <input
               type="text"
               className="form-control"
+              value={searchQuery}
+              onChange={handleSearch}
               placeholder="Buscar Usuario..."
             />
           </div>
@@ -62,7 +246,7 @@ function Usuarios() {
             className="btn btn-primary col-2"
             data-bs-toggle="modal"
             data-bs-target="#mi-modal"
-            onClick={handleShow}
+            onClick={agregarClick}
           >
             Agregar Usuario
           </button>
@@ -70,41 +254,47 @@ function Usuarios() {
 
         <div className="row m-4">
           <h3 className="mb-3">Usuarios</h3>
-          <table id="tabla-inventario" className="table">
+          <table id="tabla-clientes" className="table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Cedula</th>
-                <th>Fecha de Nacimiento</th>
-                <th>Correo</th>
-                <th>Username</th>
-                <th>Contraseña</th>
-                <th>Cargo</th>
+                {camposDataClientes.map(({ column }) => (
+                  <th>{column}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {itemUsuario.map((itemUsuario, id) => (
+              {filteredUsuarios.map((itemCliente, id) => (
                 <tr key={id}>
-                  <td>{itemUsuario.id}</td>
-                  <td>{itemUsuario.nombre}</td>
-                  <td>{itemUsuario.cedula}</td>
-                  <td>{itemUsuario.correo}</td>
-                  <td>{itemUsuario.username}</td>
-                  <td>{itemUsuario.fechaNacimiento}</td>
-                  <td>{itemUsuario.estado_activo}</td>
+                  <td
+                    className={
+                      itemCliente.estado_activo ? "activo" : "desactivo"
+                    }
+                  >
+                    {itemCliente.id}
+                  </td>
+                  <td>{itemCliente.nombre}</td>
+                  <td>{itemCliente.cedula}</td>
+                  <td>{itemCliente.correo}</td>
+                  <td>{itemCliente.fechaNacimiento}</td>
+                  <td>{itemCliente.username}</td>
+                  <td>{itemCliente.cargo.nombre}</td>
                   <td>
                     <button
-                      className="btn btn-danger"
-                      onClick={()=> eliminarUsuario(itemUsuario.id)}
-                    >
-                      Eliminar
-                    </button>
-                    <button
                       className="btn btn-warning"
-                      onClick={editarUsuario(itemUsuario.id)}
+                      onClick={function editClick() {
+                        editarClick(id);
+                      }}
+                      id="btnEditar"
                     >
                       Editar
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => eliminarUsuario(itemCliente.id)}
+                      type="submit"
+                      id="btnEliminar"
+                    >
+                      Eliminar
                     </button>
                   </td>
                 </tr>
@@ -116,7 +306,9 @@ function Usuarios() {
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title>
+            {action === 1 ? "Agregar  Usuario" : "Modificar Usuario"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form>
@@ -129,25 +321,31 @@ function Usuarios() {
                   type="text"
                   className="form-control"
                   id="nombre"
+                  defaultValue={action === 1 ? null : nombre}
+                  value={nombre}
                   required
+                  //onChange={(event) => setNombre(event.target.value)}
+                  onChange={handleInputChange}
+                  readonly
+                  minLength={3}
                 />
               </div>
               <div className="col-md-6">
-                <label for="cantidad" className="form-label">
-                  Cedula:
+                <label for="cedula" className="form-label">
+                  Cédula:
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  id="apellido"
+                  id="cedula"
+                  defaultValue={action === 1 ? "" : cedula}
+                  value={cedula}
+                  //onChange={(event) => setCedula(event.target.value)}
+                  onChange={validarCedula}
                   required
+                  // maxLength={8}
+                  minLength={8}
                 />
-              </div>
-              <div className="col-md-6">
-                <label for="fdn" className="form-label">
-                  Fecha de Nacimiento:
-                </label>
-                <input type="text" className="form-control" id="fdn" required />
               </div>
               <div className="col-md-6">
                 <label for="correo" className="form-label">
@@ -157,89 +355,135 @@ function Usuarios() {
                   type="text"
                   className="form-control"
                   id="correo"
-                  required
+                  defaultValue={action === 1 ? "" : correo}
+                  value={correo}
+                onChange={(event) => setCorreo(event.target.value)}
+                // onChange={validarTelefono}
+                
                 />
               </div>
-              <div className="col-md-6">
-                <label for="username" className="form-label">
-                  Username:
+              <div className="col-md-12">
+                <label for="fechaNacimiento" className="form-label">
+                  Fecha de nacimiento:
                 </label>
                 <input
-                  type="text"
+                  type="date"
+                  className="form-control"
+                  id="fechaNacimiento"
+                  defaultValue={action === 1 ? "" : fechaNacimiento}
+                  value={fechaNacimiento}
+                  onChange={(event) => setFechanacimiento(event.target.value)}
+                // onChange={ValidarDireccion}
+                // required
+                ></input>
+              </div>
+              <div className="col-md-12">
+                <label for="Username" className="form-label">
+                  Usuario:
+                </label>
+                <input
+                type="text"
                   className="form-control"
                   id="username"
-                  required
-                />
+                  defaultValue={action === 1 ? "" : username}
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                // onChange={ValidarDireccion}
+                // required
+                ></input>
+                <div className="col-md-12">
+                  <label for="Password" className="form-label">
+                    Password:
+                  </label>
+                  <input
+                    className="form-control"
+                    id="Password"
+                    defaultValue={action === 1 ? "" : password}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  //onChange={ValidarDireccion}
+                    required
+                  ></input>
+                </div>
               </div>
-              <div className="col-md-6">
-                <label for="contraseña" className="form-label">
-                  Contraseña:
-                </label>
+              <div>
                 <input
-                  type="text"
-                  className="form-control"
-                  id="contraseña"
-                  required
+                  type="radio"
+                  id="Empleado"
+                  value="Empleado"
+                  checked={cargo === 'Empleado'}
+                  onChange={event => setCargo(event.target.value)}
+                  name="btnEmpleado"
                 />
+                <label>Empleado</label>
               </div>
-              <div className="col-md-6">
-                <label for="cargo" className="form-label">
-                  Cargo:
-                </label>
-                <div>
-                  <input
-                    type="radio"
-                    id="empleado"
-                    name="drone"
-                    value="empleado"
-                    checked
-                  ></input>
-                  <label for="empleado">Empleado</label>
-                </div>
-                <div>
-                  <input
-                    type="radio"
-                    id="gerente"
-                    name="drone"
-                    value="gerente"
-                    checked
-                  ></input>
-                  <label for="gerente">Gerente</label>
-                </div>
-                <div>
-                  <input
-                    type="radio"
-                    id="administrador"
-                    name="drone"
-                    value="admnistrador"
-                    checked
-                  ></input>
-                  <label for="gerente">Administrador</label>
-                </div>
+              <div>
+                <input
+                  type="radio"
+                  id="Admin"
+                  name="btnAdministrador"
+                  value="Administrador"
+                  checked={cargo === 'Administrador'}
+                  onChange={event => setCargo(event.target.value)}
+                ></input>
+                <label>Admin</label>
+              </div> 
               </div>
-            </div>
-            {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Cerrar
-          </button>
-          <button
-            type="button"
-            onClick={agregarUsuario("/Usuario")}
-            className="btn btn-primary"
-          >
-            Guardar cambios
-          </button>
-        </Modal.Footer>
-      </Modal>
-    </div>
-  </>
+          {/* Operación Ternaria para definir el botón de Acción del Modal (Agregar o Modificar) */}
+          {action === 1 ? (
+            <button
+              id="agregar"
+              type="button"
+              onClick={() =>
+                agregarUsuario(
+                  "https://sysprop-production.up.railway.app/usuarios",
+                  nombre,
+                  cedula,
+                  fechaNacimiento,
+                  correo,
+                  username,
+                  password,
+                  cargo.nombre
+                )
+              }
+              className="btn btn-primary"
+            >
+              Agregar
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-success"
+              onClick={() => {
+                editarCliente(
+                  editClienteId,
+                  nombre,
+                  cedula,
+                  fechaNacimiento,
+                  correo,
+                  username,
+                  password,
+                  cargo.nombre,
+                );
+              }}
+            >
+              Guardar cambios
+            </button>
+          )}
+        </form>
+        <button
+          id="cerrar"
+          type="button"
+          className="btn btn-secondary"
+          data-bs-dismiss="modal"
+          onClick={handleClose}
+        >
+          Cerrar
+        </button>
+      </Modal.Body>
+    </Modal>
+    </div >
+    </>
   );
 }
 

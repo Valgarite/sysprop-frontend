@@ -1,174 +1,120 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Modal from "react-bootstrap/Modal";
-import { DataFetching } from "../DataFetching";
 import "../assets/styles.scss";
 import Sidebar from "../components/sidebar";
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies()
-
-async function agregarArticulo(ruta, nombre, cantidad, precio, categoria) {
-  if (!nombre || !cantidad || !precio || !categoria) {
-    alert("Todos los campos son obligatorios");
-    return;
-  } 
-  await axios
-    .post(ruta, {
-      nombre: nombre,
-      cantidad: cantidad,
-      precio: precio,
-      categoria: categoria,
-    })
-    .then((res) => console.log("posting data", res))
-    .catch((err) => console.log(err));
-
-  window.location.reload();
-}
-
-const eliminarCliente = async (id) => {
-  if (window.confirm("¿Está seguro de que desea eliminar este usuario?")) {
-    try {
-      await axios.delete(
-        `https://sysprop-production.up.railway.app/articulos/${id}`
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  window.location.reload();
-};
+import { Button, Table, Modal, ModalHeader, ModalBody, ModalFooter, Input } from 'reactstrap';
 
 
-
-var editClienteId = -1;
-
-function Inventario() {
-  const itemArticulo = DataFetching(
-    "https://sysprop-production.up.railway.app/articulos"
-  );
-  const [show, setShow] = useState(false);
-
+function Inventario(){
+  
   const [nombre, setNombre] = useState("");
   const [cantidad, setCantidad] = useState(Number);
   const [precio, setPrecio] = useState(Number);
   const [categoria, setCategoria] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const [usuarios, setUsuarios] = useState([]);
+  const [modal, setModal] = useState(false);
 
-  const Redireccion = () => {
-    if(!cookies.get('id')){
-      window.location.href="/login"
+  const toggle = () => {
+    setModal(!modal)
+    if (modal === false) {
+      setNombre('');
+      setCategoria('');
+      setPrecio('');
+      setCantidad(''); 
     }
-  }
+  };
+  
+  
+  const [searchQuery, setSearchQuery] = useState('');
 
+   const filteredUsuarios = usuarios.filter(user => {
+     const fullName = `${user.nombre}`.toLowerCase();
+     return fullName.includes(searchQuery.toLowerCase());
+   });
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredUsuarios = itemArticulo.filter((user) => {
-    const fullName = `${user.nombre}${user.cedula}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase());
-  });
-
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchQuery(event.target.value);
   };
 
-  var clienteIndex; // Variable para almacenar el ID del cliente que se modificará
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  function editarClick(id) {
-    editClienteId = itemArticulo[id].id;
-    clienteIndex = id;
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('https://sysprop-production.up.railway.app/articulos');
+      setUsuarios(response.data);
 
-    setNombre(itemArticulo[clienteIndex].nombre);
-    setCantidad(itemArticulo[clienteIndex].cantidad);
-    setPrecio(itemArticulo[clienteIndex].precio);
-    setCategoria(itemArticulo[clienteIndex].categoria.nombre);
-
-    handleEditar();
-    handleShow();
-  }
-
-  function agregarClick() {
-    handleAgregar();
-    handleShow();
-  }
-
-  useEffect(()=>{
-    Redireccion()
-  },[])
-
-  const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
-  const handleAgregar = () => setAction(1);
-  const handleEditar = () => setAction(2); // El estado 2 define que el Modal será utilizado para Modificar un cliente existente
-
-  const camposDataClientes = [
-    {
-      column: "ID",
-    },
-    {
-      column: "Nombre",
-    },
-    {
-      column: "Cantidad",
-    },
-    {
-      column: "Precio",
-    },
-    {
-      column: "Categoria",
-    },
-    {
-      column: "Acciones",
-    },
-  ];
-
-  /*************VALIDAR NOMBRE*******************/
-
-  const handleInputChange = (event) => {
-    const { value } = event.target;
-    const regex = /^[a-zñA-ZÑ\s]*$/;
-    if (regex.test(value) && value.length <= 64) {
-      setNombre(value);
-    } else if (!value) {
-      setNombre("");
+    } catch (error) {
+      console.log(error);
     }
   };
 
+  const editarClick = user => {
+    setSelectedUser(user);
+    toggle();
 
-  /*************VALIDAR NROS**********/
-  
-  const ValidarCategoria = (event) => {
-    const { value } = event.target;
-    if (value <= 4 && value >= 1 ) {
-      setCategoria(value);
-    } else if (!value) {
-      setCategoria("");
+    setNombre(user.nombre);
+    setCantidad(user.cantidad);
+    setPrecio(user.precio);
+    setCategoria(user.categoria);
+    
+  };
+
+  const handleSubmit = async event => {
+    event.preventDefault();
+
+    try {
+      if (selectedUser) {
+        await axios.put(
+          `https://sysprop-production.up.railway.app/articulos/${selectedUser.id}`,
+          {
+            nombre,
+            cantidad,
+            precio,
+            categoria
+          });
+        setSelectedUser(null);
+        
+        
+
+      } else {
+        await axios.post(
+          'https://sysprop-production.up.railway.app/articulos/comprar',
+          {
+            nombre,
+            cantidad,
+            precio,
+            categoria
+          });
+      }
+
+      setNombre('');
+      setCantidad('');
+      setPrecio('');
+      setCategoria('');
+      fetchData();
+      toggle();
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const ValidarPrecio = (event) => {
-    const { value } = event.target;
-    if (value >= 1 && value <=100000) {
-      setPrecio(value);
-    } else if (!value) {
-      setPrecio("");
+  const eliminarCliente = async id => {
+    try {
+      await axios.delete(
+        `https://sysprop-production.up.railway.app/articulos/${id}`
+      );
+      fetchData();
+    } catch (error) {
+      console.log(error);
     }
-  };
+  }; // El estado 2 define que el Modal será utilizado para Modificar un cliente existente
 
-  const ValidarCantidad = (event) => {
-    const { value } = event.target;
-    if (value >= 1 && value <=500) {
-      setCantidad(value);
-    } else if (!value) {
-      setCantidad("");
-    }
-  };
-  
 
-  
+
   /******************************************/
 
   return (
@@ -195,152 +141,119 @@ function Inventario() {
             className="btn btn-primary col-2"
             data-bs-toggle="modal"
             data-bs-target="#mi-modal"
-            onClick={agregarClick}
+            onClick={toggle}
           >
-            Agregar Cliente
+            Agregar Articulo
           </button>
         </div>
 
-        <div className="row m-4">
-          <h3 className="mb-3">Articulos Registrados</h3>
-          <table id="tabla-clientes" className="table">
+        <div className="row m-4 userTable">
+          <Table bordered responsive className='userTable'>
             <thead>
               <tr>
-                {camposDataClientes.map(({ column }) => (
-                  <th>{column}</th>
-                ))}
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Categoria</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsuarios.map((itemArticulo, id) => (
+              {filteredUsuarios.map((user, id) => (
                 <tr key={id}>
-                  <td
-                    className={
-                      itemArticulo.estado_activo ? "activo" : "desactivo"
-                    }
-                  >
-                    {itemArticulo.id}
-                  </td>
-                  <td>{itemArticulo.nombre}</td>
-                  <td>{itemArticulo.cantidad}</td>
-                  <td>{itemArticulo.precio}</td>
-                  <td>{itemArticulo.categoria.nombre}</td>
+                  <td>{user.id}</td>
+                  <td>{user.nombre}</td>
+                  <td>{user.precio}</td>
+                  <td>{user.cantidad}</td>
+                  <td>{user.categoria.nombre}</td>
                   <td>
                     <button
                       className="btn btn-danger"
-                      onClick={() => eliminarCliente(itemArticulo.id)}
-                      type="submit"
-                      id="btnEliminar"
+                      onClick={() => eliminarCliente(user.id)}
                     >
                       Eliminar
+                    </button>
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => editarClick(user)}
+                    >
+                      Editar
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       </div>
 
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {action === 1 ? "Agregar cliente" : "Modificar cliente"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label for="nombre" className="form-label">
-                  Nombre:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombre"
-                  defaultValue={action === 1 ? null : nombre}
-                  value={nombre}
-                  required
-                  //onChange={(event) => setNombre(event.target.value)}
-                  onChange={handleInputChange}
-                  readonly
-                  minLength={3}
-                />
-              </div>
-              <div className="col-md-6">
-                <label for="cantidad" className="form-label">
-                  Cantidad:
-                </label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="cantidad"
-                  defaultValue={action === 1 ? null : cantidad}
-                  value={cantidad}
-                  onChange={ValidarCantidad}
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label for="precio" className="form-label">
-                  Precio:
-                </label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="precio"
-                  defaultValue={action === 1 ? null : precio}
-                  value={precio}
-                  onChange={ValidarPrecio}
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label for="categoria" className="form-label">
-                  Categoria:
-                </label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="categoria"
-                  defaultValue={action === 1 ? null : categoria}
-                  value={categoria}
-                  onChange={ValidarCategoria}
-                  required
-                />
-              </div>
+      <Modal className='mt-5' isOpen={modal} size='xl' centered toggle={toggle}>
+        <ModalHeader toggle={toggle}>Agregar Nuevo Usuario</ModalHeader>
+        <ModalBody>
+          <form onSubmit={handleSubmit} className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">
+                Nombre:
+              </label>
+              <Input
+                type="text"
+                defaultValue={nombre}
+                onChange={event => setNombre(event.target.value)}
+                className="form-control"
+                id="nombre"
+                required
+              />
             </div>
-            {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
-            
-              <button
-                id="agregar"
-                type="button"
-                onClick={() =>
-                  agregarArticulo(
-                    "https://sysprop-production.up.railway.app/articulos/comprar",
-                    nombre,
-                    cantidad,
-                    precio,
-                    categoria
-                  )
-                }
-                className="btn btn-primary"
-              >
-                Agregar
-              </button>
-            
+            <div className="col-md-6">
+              <label className="form-label">
+                Cantidad:
+              </label>
+              <Input
+                type="number"
+                className="form-control"
+                defaultValue={cantidad}
+                onChange={event => setCantidad(event.target.value)}
+                id="cantidad"
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">
+                Precio:
+              </label>
+              <Input
+                type="number"
+                className="form-control"
+                defaultValue={precio}
+                onChange={event => setPrecio(event.target.value)}
+                id="precio"
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">
+                Categoria:
+              </label>
+              <Input
+                type="number"
+                className="form-control"
+                defaultValue={categoria}
+                onChange={event => setCategoria(event.target.value)}
+                id="categoria"
+                required
+              />
+            </div>
           </form>
-          <button
-            id="cerrar"
-            type="button"
-            className="btn btn-secondary"
-            data-bs-dismiss="modal"
-            onClick={handleClose}
-          >
-            Cerrar
-          </button>
-        </Modal.Body>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={handleSubmit}>
+            Guardar
+          </Button>
+          <Button color="secondary" onClick={toggle}>
+            Cancelar
+          </Button>
+        </ModalFooter>
       </Modal>
     </div>
   );
