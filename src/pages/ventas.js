@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
+import Select from "react-select";
 import {
   Card,
   CardBody,
@@ -8,16 +9,15 @@ import {
   Col,
   FormGroup,
   Input,
-  InputGroup,
-  InputGroupText,
   Label,
   Row,
   Table,
   Button,
 } from "reactstrap";
 import Sidebar from "../components/sidebar";
-//articulos/vender
+import Cookies from "universal-cookie";
 
+const cookies = new Cookies()
 
 async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
   if (!nombre || !cedula || !telefono || !direccion) {
@@ -53,16 +53,16 @@ async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
     })
     .then((res) => console.log("posting data", res))
     .catch((err) => console.log(err));
-
-  window.location.reload();
+  window.location.reload()
 }
 
-async function agregarVenta(ruta, nombre, cantidad, precio) {
+async function agregarVenta(idUsuario, idCliente, listaArticulos, listaCantidades) {
   await axios
-    .post(ruta, {
-      nombre: nombre,
-      cantidad: cantidad,
-      precio: precio,
+    .post("https://sysprop-production.up.railway.app/ventas/registrar", {
+      idusuario: idUsuario,
+      idcliente: idCliente,
+      articulos: listaArticulos,
+      cantidades: listaCantidades,
     })
     .then((res) => console.log("posting data", res))
     .catch((err) => console.log(err));
@@ -71,25 +71,52 @@ async function agregarVenta(ruta, nombre, cantidad, precio) {
 
 
 
+var actualCliente = { 
+  nombre: "Nombre de cliente",
+  cedula: "",
+  id: 0,
+}
+
+var articulosSeleccionados = []
+var articulosCantidades = []
+
+const usuarioActual = cookies.get("id")
+
 function Ventas() {
   const [show, setShow] = useState(false);
   const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [subtotal, setSubtotal] = useState(0);
-  const [igv, setIgv] = useState(0);
   const [total, setTotal] = useState(0);
   const [showModal, setShowModal] = useState(false)
+  const [confirmarVenta, setConfirmarVenta] = useState(false)
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [nombreCliente, setNombreCliente] = useState(null);
+
+  const handleSelectChange = (selectedOption) => {
+    setSelectedOption(selectedOption);
+    document.getElementById('cedula').value = selectedOption.value;
+    actualCliente = clientes.find(function(cliente){
+      return cliente.cedula === selectedOption.value
+    })
+  };
+
   const [nombre, setNombre] = useState("");
   const [cedula, setCedula] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
-  
+
+  const [detalleProductos, setDetalleProductos] = useState([]);
+  const [cantidadesProductos, setCantidadesProductos] = useState([])
+  const [clientes, setClientes] = useState([])
+
   const handleModalSeleccionar = () => setShowModal(true);
   const handleModalAgregar = () => setShowModal(2);
   const closeModal = () => setShowModal(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleConfirm = () => setConfirmarVenta(true);
+  const handleConfirmClose = () => setConfirmarVenta(false);
 
   useEffect(() => {
     axios
@@ -100,32 +127,53 @@ function Ventas() {
       .catch((error) => {
         console.log(error);
       });
+
+      // Peticion GET a Clientes
+      fetch("https://sysprop-production.up.railway.app/clientes")
+      .then((response) => response.json())
+      .then((data) => {
+        setClientes(data);
+      })
   }, []);
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
-  const handleEditar = () => setAction(2);
 
   useEffect(() => {
     const selectedProductObjects = productos.filter((producto) =>
       selectedProducts.includes(producto.id)
     );
-    const subtotal = selectedProductObjects.reduce(
+    const total = selectedProductObjects.reduce(
       (acc, producto) => acc + producto.cantidad * producto.precio,
       0
     );
-    const igv = subtotal * 0.18;
-    const total = subtotal + igv;
-    setSubtotal(subtotal);
-    setIgv(igv);
     setTotal(total);
-  }, [selectedProducts, productos]);
+  }, [selectedProducts, productos, handleSelectChange]);
 
   const handleCheck = (productId) => {
     setSelectedProducts((prevSelectedProducts) => {
       if (prevSelectedProducts.includes(productId)) {
+        const newDetalleProductos = detalleProductos.filter(
+          (p) => p.id !== productId
+        );
+        setDetalleProductos(newDetalleProductos);
         return prevSelectedProducts.filter((id) => id !== productId);
       } else {
+        const productoSeleccionado = productos.find((p) => p.id === productId);
+        const newDetalleProductos = [
+          ...detalleProductos,
+          { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad },
+        ];
+        setDetalleProductos(newDetalleProductos);
+
+        const nuevosDetalles = [...detalleProductos];
+        const detalleIndex = nuevosDetalles.findIndex((p) => p.id === productoSeleccionado.id);
+        if (detalleIndex !== -1) {
+          nuevosDetalles[detalleIndex].cantidad = productoSeleccionado.cantidad;
+        } else {
+          nuevosDetalles.push({ ...productoSeleccionado, cantidad: productoSeleccionado.cantidad });
+        }
+        setDetalleProductos(nuevosDetalles);
         return [...prevSelectedProducts, productId];
       }
     });
@@ -149,8 +197,6 @@ function Ventas() {
     handleAgregar();
     handleShow();
   }
-
-  
 
   const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
     if (!nombre || !cedula || !telefono || !direccion) {
@@ -228,19 +274,33 @@ function Ventas() {
   };
   /******************************************/
 
+  const preConfirmar = async () => {
+    if((actualCliente.id > 0) && (detalleProductos.length > 0)){
+      {
+        detalleProductos.map((producto)=>{
+          articulosSeleccionados.push(producto.nombre)
+          articulosCantidades.push(parseInt(producto.cantidad))
+        })
+      }
+      handleConfirm() // Redirecciona al Modal de Confirmación
+    } else if(actualCliente.id === 0) {
+      alert("Se debe seleccionar un cliente")
+    } else if (detalleProductos.length === 0){
+      alert("No se han seleccionado articulos ")
+    }
+
+  }  
+
   return (
     <>
       <Sidebar />
       <div>
         <div id="cuerpo">
-        <div className="m-4 row">
-          <h3>Registro de venta</h3>
-          <div className="col-6">
-            <Button
-              color="primary">Visualizar Ventas
-              </Button>
-            
-          </div>
+          <div className="m-4 row">
+            <h3>Registro de venta</h3>
+            <div className="col-6">
+              <Button color="primary">Visualizar Ventas</Button>
+            </div>
           </div>
           <Row>
             <Col sm={8}>
@@ -253,22 +313,9 @@ function Ventas() {
                       Cliente
                     </CardHeader>
                     <CardBody>
-                    <Row className="mt-2">
-                        <Col sm={12}>
-                          <Button
-                            color="primary"
-                            flex
-                            onClick={handleModalSeleccionar}
-                          >
-                            Seleccionar Cliente
-                          </Button>
-                        </Col>
-                        <Col >
-                          <Button
-                            color="danger"
-                
-                            onClick={agregarClick}
-                          >
+                      <Row className="mt-2">
+                        <Col>
+                          <Button color="success" onClick={agregarClick}>
                             Agregar Cliente
                           </Button>
                         </Col>
@@ -276,14 +323,26 @@ function Ventas() {
                       <Row>
                         <Col sm={6}>
                           <FormGroup>
-                            <Label>Nro Documento</Label>
-                            <Input bsSize="sm" />
+                            <Label>Nombre</Label>
+                            <Select
+                              filterOption={(option, searchText) =>
+                                option.label
+                                  .toLowerCase()
+                                  .includes(searchText.toLowerCase())
+                              }
+                              options={clientes.map((cliente) => ({
+                                value: cliente.cedula,
+                                label: cliente.nombre,
+                              }))}
+                              placeholder="Seleccione un cliente"
+                              onChange={handleSelectChange} // Agregamos el manejador de eventos
+                            />
                           </FormGroup>
                         </Col>
                         <Col sm={6}>
                           <FormGroup>
-                            <Label>Nombre</Label>
-                            <Input bsSize="sm" />
+                            <Label>Cédula</Label>
+                            <Input bsSize="sm" id="cedula" disabled="true" />
                           </FormGroup>
                         </Col>
                       </Row>
@@ -320,7 +379,7 @@ function Ventas() {
                                 <th></th>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
-                                <th>Precio</th>
+                                <th>Precio c/u</th>
                                 <th>Total</th>
                               </tr>
                             </thead>
@@ -330,33 +389,60 @@ function Ventas() {
                                   <td>
                                     <Input
                                       type="checkbox"
-                                      bsSize="sm"
-                                      checked={selectedProducts.includes(producto.id)}
+                                      bsSize="md"
+                                      checked={selectedProducts.includes(
+                                        producto.id
+                                      )}
                                       onChange={() => handleCheck(producto.id)}
-
                                     />
                                   </td>
                                   <td>{producto.nombre}</td>
                                   <td>
-
                                     <FormGroup>
                                       <Input
                                         type="number"
-                                        value={producto.cantidad}
+                                        defaultValue={0}
                                         onChange={(e) => {
-                                          const nuevosProductos = [...productos];
-                                          nuevosProductos[
-                                            nuevosProductos.indexOf(producto)
-                                          ].cantidad = e.target.value;
+                                          const nuevosProductos = [
+                                            ...productos,
+                                          ];
+                                          const index =
+                                            nuevosProductos.indexOf(producto);
+                                          nuevosProductos[index] = {
+                                            ...producto,
+                                            cantidad: e.target.value,
+                                          };
                                           setProductos(nuevosProductos);
+
+                                          const nuevosDetalles = [
+                                            ...detalleProductos,
+                                          ];
+                                          const detalleIndex =
+                                            nuevosDetalles.findIndex(
+                                              (p) => p.id === producto.id
+                                            );
+                                          if (detalleIndex !== -1) {
+                                            nuevosDetalles[
+                                              detalleIndex
+                                            ].cantidad = e.target.value;
+                                          } else {
+                                            nuevosDetalles.push({
+                                              ...producto,
+                                              cantidad: e.target.value,
+                                            });
+                                          }
+                                          setDetalleProductos(nuevosDetalles);
                                         }}
                                       />
                                     </FormGroup>
                                   </td>
                                   <td>
-                                    <span>{producto.precio}</span>
+                                    <span>{producto.precio + " Bs."}</span>
                                   </td>
-                                  <td>{producto.cantidad * producto.precio}</td>
+                                  <td>
+                                    {producto.cantidad * producto.precio +
+                                      " Bs."}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -369,354 +455,245 @@ function Ventas() {
               </Row>
             </Col>
 
-            
-
-            <Col sm={4}>
-              <Row className="mb-2 mx-2">
-                <Col sm={12}>
-                  <Card>
-                    <CardHeader
-                      style={{ backgroundColor: "#4e73df", color: "white" }}
-                    >
-                      Detalle
-                    </CardHeader>
-                    <CardBody>
-                      <Row className="mb-2">
-                        <Col sm={12}>
-                          <InputGroup size="sm">
-                            <InputGroupText>Tipo:</InputGroupText>
-                            <Input type="select">
-                              <option value="Boleta">Boleta</option>
-                            </Input>
-                          </InputGroup>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col sm={12}>
-                          <Table size="sm">
-                            <tbody>
-                              <tr>
-                                <td>Subtotal:</td>
-                                <td>{subtotal}</td>
-                              </tr>
-                              <tr>
-                                <td>IGV (18%):</td>
-                                <td>{igv}</td>
-                              </tr>
-                              <tr>
-                                <td>Total:</td>
-                                <td>{total}</td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </Col>
-                      </Row>
-                      <Row className="mt-2">
-                        <Col sm={12}>
-                          <Button
-                            color="success"
-                            size="sm"
-                            block
-                            onClick={() =>
-                              selectedProducts.forEach((id) => {
-                                const producto = productos.find((producto) => producto.id === id);
-                                agregarVenta("/articulos/vender", producto.nombre, producto.cantidad, producto.precio);
-                              })
-                            }
-                          >
-                            Vender
-                          </Button>
-                        </Col>
-                      </Row>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
-
-              <Row className="mx-2">
-                <Col sm={12}>
-                  <Card>
-                    <CardBody>
-                      <Button
-                        color="success"
-                        block
-                        onClick={() => {
-                          agregarVenta(
-                            "https://sysprop-production.up.railway.app/Ventas",
-                            "Cliente1",
-                            JSON.stringify(productos),
-                            subTotal(productos) * 1.18
-                          );
-                        }}
+            <Col sm={4} className="detalle-venta">
+              <div className="sticky-top">
+                <Row className="mb-2 mx-2">
+                  <Col sm={12}>
+                    <Card className="detalle-venta">
+                      <CardHeader
+                        style={{ backgroundColor: "#4e73df", color: "white" }}
                       >
-                        <i className="fas fa-money-check"></i> Terminar Venta
-                      </Button>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
+                        Detalle
+                      </CardHeader>
+                      <CardBody>
+                        <Row>
+                          <Col sm={12}>
+                            <Table size="sm">
+                              <tbody>
+                                <tr>
+                                  <td className="fw-semibold">Artí­culo</td>
+                                  <td className="fw-semibold">Cantidad</td>
+                                  <td className="fw-semibold">Precio</td>
+                                </tr>
+                                {detalleProductos.map((producto) => (
+                                  <tr key={producto.id}>
+                                    <td>{producto.nombre}</td>
+                                    <td>{producto.cantidad}</td>
+                                    <td>{producto.precio}</td>
+                                  </tr>
+                                ))}
+                                <tr>
+                                  <td>Total:</td>
+                                  <td>{total}</td>
+                                </tr>
+                              </tbody>
+                            </Table>
+                          </Col>
+                        </Row>
+                        <Row className="mx-2">
+                          <Col sm={12}>
+                            <Card>
+                              <CardBody>
+                                <Button
+                                  color="success"
+                                  block
+                                  onClick={preConfirmar}
+                                >
+                                  <i className="fas fa-money-check"></i>{" "}
+                                  Registrar Venta
+                                </Button>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                        </Row>
+                      </CardBody>
+                    </Card>
+                  </Col>
+                </Row>
+              </div>
             </Col>
           </Row>
-
-          
         </div>
-        <Modal show={showModal} onHide={closeModal} className="Modal-SeleccionarCliente" >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Lista de Clientes
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label for="nombre" className="form-label">
-                  Nombre:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombre"
-                  defaultValue={action === 1 ? null : nombre}
-                  value={nombre}
-                  required
-                  //onChange={(event) => setNombre(event.target.value)}
-                  onChange={handleInputChange}
-                  readonly
-                  minLength={3}
-                />
-              </div>
-              <div className="col-md-6">
-                <label for="cedula" className="form-label">
-                  Cédula:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="cedula"
-                  defaultValue={action === 1 ? "" : cedula}
-                  value={cedula}
-                  //onChange={(event) => setCedula(event.target.value)}
-                  onChange={validarCedula}
-                  required
-                  // maxLength={8}
-                  minLength={8}
-                />
-              </div>
-              <div className="col-md-6">
-                <label for="telefono" className="form-label">
-                  Teléfono:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="telefono"
-                  defaultValue={action === 1 ? "" : telefono}
-                  value={telefono}
-                  //onChange={(event) => setTelefono(event.target.value)}
-                  onChange={validarTelefono}
-                  required
-                />
-              </div>
-              <div className="col-md-12">
-                <label for="direccion" className="form-label">
-                  Dirección:
-                </label>
-                <textarea
-                  className="form-control"
-                  id="direccion"
-                  defaultValue={action === 1 ? "" : direccion}
-                  value={direccion}
-                  //onChange={(event) => setDireccion(event.target.value)}
-                  onChange={ValidarDireccion}
-                  required
-                ></textarea>
-              </div>
-            </div>
-            {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
-            {action === 1 ? (
-              <button
-                id="agregar"
-                type="button"
-                onClick={() =>
-                  agregarCliente(
-                    "https://sysprop-production.up.railway.app/clientes",
-                    nombre,
-                    cedula,
-                    telefono,
-                    direccion
-                  )
-                }
-                className="btn btn-primary"
-              >
-                Agregar
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={() => {
-                  editarCliente(
-                    editClienteId,
-                    nombre,
-                    cedula,
-                    telefono,
-                    direccion
-                  );
-                }}
-              >
-                Guardar cambios
-              </button>
-            )}
-          </form>
-          <button
-            id="cerrar"
-            type="button"
-            className="btn btn-secondary"
-            data-bs-dismiss="modal"
-            onClick={handleClose}
-          >
-            Cerrar
-          </button>
-        </Modal.Body>
-        </Modal>
 
+        {/* MODAL DE CONFIRMAR VENTA */}
+        <Modal
+          className="Modal-SeleccionarCliente"
+          show={confirmarVenta}
+          onHide={handleConfirmClose}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirmación de Venta</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="d-flex flex-column">
+              <span>{`Cliente: ${actualCliente.nombre}`}</span>
+              <span>{`Cédula: ${actualCliente.cedula}`}</span>
+            </div>
+            <Card className="detalle-venta">
+              <CardHeader
+                style={{ backgroundColor: "#4e73df", color: "white" }}
+              >
+                Detalles
+              </CardHeader>
+              <CardBody>
+                <Row>
+                  <Col sm={12}>
+                    <Table size="sm">
+                      <tbody>
+                        <tr>
+                          <td className="fw-semibold">Artí­culo</td>
+                          <td className="fw-semibold">Cantidad</td>
+                          <td className="fw-semibold">Precio</td>
+                        </tr>
+                        {detalleProductos.map((producto) => (
+                          <tr key={producto.id}>
+                            <td>{producto.nombre}</td>
+                            <td>{producto.cantidad}</td>
+                            <td>{producto.precio}</td>
+                          </tr>
+                        ))}
+                        <tr>
+                          <td className="fw-semibold">Total:</td>
+                          <td></td>
+                          <td className="fw-semibold">{total}</td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </Col>
+                </Row>
+              </CardBody>
+            </Card>
+            <button
+              id="registrarVenta"
+              type="button"
+              className="btn btn-primary"
+              data-bs-dismiss="modal"
+              onClick={
+                ()=> agregarVenta(usuarioActual, actualCliente.id, articulosSeleccionados, articulosCantidades)
+              }
+            >
+              Registrar venta
+            </button>
+            <button
+              id="cerrar"
+              type="button"
+              className="btn btn-secondary"
+              data-bs-dismiss="modal"
+              onClick={function cancelarVenta(){
+                articulosSeleccionados = []
+                articulosCantidades = []
+                handleConfirmClose()
+              }}
+            >
+              Cancelar
+            </button>
+          </Modal.Body>
+        </Modal>
 
         {/* MODAL DE AGREGAR NUEVO USUARIO */}
         <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {action === 1 ? "Agregar cliente" : "Modificar cliente"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label for="nombre" className="form-label">
-                  Nombre:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombre"
-                  defaultValue={action === 1 ? null : nombre}
-                  value={nombre}
-                  required
-                  //onChange={(event) => setNombre(event.target.value)}
-                  onChange={handleInputChange}
-                  readonly
-                  minLength={3}
-                />
+          <Modal.Header closeButton>
+            <Modal.Title>Agregar cliente</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label for="nombre" className="form-label">
+                    Nombre:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nombre"
+                    defaultValue={action === 1 ? "" : nombre}
+                    value={nombre}
+                    required
+                    //onChange={(event) => setNombre(event.target.value)}
+                    onChange={handleInputChange}
+                    readonly
+                    minLength={3}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label for="cedula" className="form-label">
+                    Cédula:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cedula"
+                    defaultValue={action === 1 ? "" : cedula}
+                    value={cedula}
+                    //onChange={(event) => setCedula(event.target.value)}
+                    onChange={validarCedula}
+                    required
+                    // maxLength={8}
+                    minLength={8}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label for="telefono" className="form-label">
+                    Teléfono:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="telefono"
+                    defaultValue={action === 1 ? "" : telefono}
+                    value={telefono}
+                    //onChange={(event) => setTelefono(event.target.value)}
+                    onChange={validarTelefono}
+                    required
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label for="direccion" className="form-label">
+                    Dirección:
+                  </label>
+                  <textarea
+                    className="form-control"
+                    id="direccion"
+                    defaultValue={action === 1 ? "" : direccion}
+                    value={direccion}
+                    //onChange={(event) => setDireccion(event.target.value)}
+                    onChange={ValidarDireccion}
+                    required
+                  ></textarea>
+                </div>
               </div>
-              <div className="col-md-6">
-                <label for="cedula" className="form-label">
-                  Cédula:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="cedula"
-                  defaultValue={action === 1 ? "" : cedula}
-                  value={cedula}
-                  //onChange={(event) => setCedula(event.target.value)}
-                  onChange={validarCedula}
-                  required
-                  // maxLength={8}
-                  minLength={8}
-                />
-              </div>
-              <div className="col-md-6">
-                <label for="telefono" className="form-label">
-                  Teléfono:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="telefono"
-                  defaultValue={action === 1 ? "" : telefono}
-                  value={telefono}
-                  //onChange={(event) => setTelefono(event.target.value)}
-                  onChange={validarTelefono}
-                  required
-                />
-              </div>
-              <div className="col-md-12">
-                <label for="direccion" className="form-label">
-                  Dirección:
-                </label>
-                <textarea
-                  className="form-control"
-                  id="direccion"
-                  defaultValue={action === 1 ? "" : direccion}
-                  value={direccion}
-                  //onChange={(event) => setDireccion(event.target.value)}
-                  onChange={ValidarDireccion}
-                  required
-                ></textarea>
-              </div>
-            </div>
-            {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
-            {action === 1 ? (
-              <button
-                id="agregar"
-                type="button"
-                onClick={() =>
-                  agregarCliente(
-                    "https://sysprop-production.up.railway.app/clientes",
-                    nombre,
-                    cedula,
-                    telefono,
-                    direccion
-                  )
-                }
-                className="btn btn-primary"
-              >
-                Agregar
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={() => {
-                  editarCliente(
-                    editClienteId,
-                    nombre,
-                    cedula,
-                    telefono,
-                    direccion
-                  );
-                }}
-              >
-                Guardar cambios
-              </button>
-            )}
-          </form>
-          <button
-            id="cerrar"
-            type="button"
-            className="btn btn-secondary"
-            data-bs-dismiss="modal"
-            onClick={handleClose}
-          >
-            Cerrar
-          </button>
-        </Modal.Body>
-      </Modal>
+              {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
+                <button
+                  id="agregar"
+                  type="button"
+                  onClick={() =>
+                    agregarCliente(
+                      "https://sysprop-production.up.railway.app/clientes",
+                      nombre,
+                      cedula,
+                      telefono,
+                      direccion
+                    )
+                  }
+                  className="btn btn-primary"
+                >
+                  Agregar
+                </button>
+            </form>
+            <button
+              id="cerrar"
+              type="button"
+              className="btn btn-secondary"
+              data-bs-dismiss="modal"
+              onClick={handleClose}
+            >
+              Cerrar
+            </button>
+          </Modal.Body>
+        </Modal>
       </div>
     </>
   );
 }
 
 export default Ventas
-
-//id cliente
-//total
-
-function subTotal(productos) {
-  let suma = 0;
-  for (let producto of productos) {
-    suma += producto.cantidad * producto.precio;
-  }
-  return suma;
-}

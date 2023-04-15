@@ -73,17 +73,17 @@ const eliminarUsuario = async (id) => {
   window.location.reload();
 };
 
-const editarCliente = async (id, nombre, cedula, fechaNacimiento, correo, username, password, cargo) => {
+const editarUsuario = async (id, nombre, cedula, fechaNacimiento, correo, username, password, cargo) => {
   if (!nombre || !cedula) {
     alert("Todos los campos son obligatorios");
     return;
   }
   if (cedula.length < 8 || cedula.length > 12) {
-    alert("Cedula Invalida");
+    alert("Cédula Inválida");
     return;
   }
   if (nombre.length < 3 || nombre.length > 64) {
-    alert("Nombre Invalido");
+    alert("Nombre Inválido");
     return;
   }
   try {
@@ -106,10 +106,10 @@ const editarCliente = async (id, nombre, cedula, fechaNacimiento, correo, userna
   window.location.reload();
 };
 
-var editClienteId = -1;
+var editUsuarioId;
 
 function Usuarios() {
-  const itemCliente = DataFetching(
+  const itemUsuario = DataFetching(
     "https://sysprop-production.up.railway.app/usuarios"
   );
 
@@ -128,7 +128,7 @@ function Usuarios() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsuarios = itemCliente.filter((user) => {
+  const filteredUsuarios = itemUsuario.filter((user) => {
     const fullName = `${user.nombre}${user.cedula}`.toLowerCase();
     return fullName.includes(searchQuery.toLowerCase());
   });
@@ -137,22 +137,20 @@ function Usuarios() {
     setSearchQuery(event.target.value);
   };
 
-  var clienteIndex; // Variable para almacenar el ID del cliente que se modificará
+  var userIndex; // Variable para almacenar el ID del Usuario que se modificará
 
   function editarClick(id) {
-    editClienteId = itemCliente[id].id;
-    clienteIndex = id;
+    editUsuarioId = itemUsuario[id].id;
+    userIndex = id;
 
-      setNombre(itemCliente[clienteIndex].nombre);
-      setCedula(itemCliente[clienteIndex].cedula);
-      setFechanacimiento(itemCliente[clienteIndex].fechaNacimiento);
-      setCorreo(itemCliente[clienteIndex].correo);
-      setUsername(itemCliente[clienteIndex].username);
-      setPassword(itemCliente[clienteIndex].password);
-      setCargo(itemCliente[clienteIndex].cargo.nombre);
+      setNombre(itemUsuario[userIndex].nombre);
+      setCedula(itemUsuario[userIndex].cedula);
+      setFechanacimiento(itemUsuario[userIndex].fechaNacimiento);
+      setCorreo(itemUsuario[userIndex].correo);
+      setUsername(itemUsuario[userIndex].username);
+      setPassword(itemUsuario[userIndex].password);
+      setCargo(itemUsuario[userIndex].cargo.nombre);
     
-    
-
     handleEditar();
     handleShow();
   }
@@ -166,7 +164,7 @@ function Usuarios() {
   const handleAgregar = () => setAction(1);
   const handleEditar = () => setAction(2); // El estado 2 define que el Modal será utilizado para Modificar un cliente existente
 
-  const camposDataClientes = [
+  const camposDataUsuarios = [
     {
       column: "ID",
     },
@@ -257,27 +255,27 @@ function Usuarios() {
           <table id="tabla-clientes" className="table">
             <thead>
               <tr>
-                {camposDataClientes.map(({ column }) => (
+                {camposDataUsuarios.map(({ column }) => (
                   <th>{column}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filteredUsuarios.map((itemCliente, id) => (
+              {filteredUsuarios.map((itemUsuario, id) => (
                 <tr key={id}>
                   <td
                     className={
-                      itemCliente.estado_activo ? "activo" : "desactivo"
+                      itemUsuario.estado_activo ? "activo" : "desactivo"
                     }
                   >
-                    {itemCliente.id}
+                    {itemUsuario.id}
                   </td>
-                  <td>{itemCliente.nombre}</td>
-                  <td>{itemCliente.cedula}</td>
-                  <td>{itemCliente.correo}</td>
-                  <td>{itemCliente.fechaNacimiento}</td>
-                  <td>{itemCliente.username}</td>
-                  <td>{itemCliente.cargo.nombre}</td>
+                  <td>{itemUsuario.nombre}</td>
+                  <td>{itemUsuario.cedula}</td>
+                  <td>{itemUsuario.correo}</td>
+                  <td>{itemUsuario.fechaNacimiento}</td>
+                  <td>{itemUsuario.username}</td>
+                  <td>{itemUsuario.cargo.nombre}</td>
                   <td>
                     <button
                       className="btn btn-warning"
@@ -290,7 +288,7 @@ function Usuarios() {
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => eliminarUsuario(itemCliente.id)}
+                      onClick={() => eliminarUsuario(itemUsuario.id)}
                       type="submit"
                       id="btnEliminar"
                     >
@@ -455,8 +453,9 @@ function Usuarios() {
               type="button"
               className="btn btn-success"
               onClick={() => {
-                editarCliente(
-                  editClienteId,
+                editarUsuario
+              (
+                  editUsuarioId,
                   nombre,
                   cedula,
                   fechaNacimiento,

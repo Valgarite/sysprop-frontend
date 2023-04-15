@@ -9,7 +9,7 @@ import iconDef from "../assets/images/user-default.png"
 const cookies = new Cookies()
 
 const Sidebar = () => {
-	const [isExpanded, setExpendState] = useState(true);
+	const [isExpanded, setExpendState] = useState(false);
 	const [isUserAuthenticated, setUserState] = useState(false)
 	const [userIcon, setUserIcon] = useState(iconDef)
 

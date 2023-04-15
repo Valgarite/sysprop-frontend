@@ -116,7 +116,6 @@ function Clientes() {
     }
   }
 
-
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredUsuarios = itemCliente.filter((user) => {

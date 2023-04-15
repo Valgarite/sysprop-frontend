@@ -17,6 +17,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^5.3.4",
     "react-scripts": "5.0.1",
+    "react-select": "^5.7.2",
     "reactstrap": "^9.1.8",
     "sass": "^1.59.3",
     "universal-cookie": "^4.0.4",
