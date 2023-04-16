@@ -59,20 +59,6 @@ async function agregarProveedor(
   window.location.reload();
 }
 
-const eliminarCliente = async (id) => {
-  if (window.confirm("¿Está seguro de que desea eliminar este proveedor?")) {
-    try {
-      await axios.delete(
-        `https://sysprop-production.up.railway.app/proveedores/${id}`
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  window.location.reload();
-};
-
 const editarCliente = async (id, nombre, rif, telefono, direccion, correo) => {
   if (correo.length === 0 ){
     alert("Correo  Invalido");
@@ -335,14 +321,6 @@ function Dashboard() {
                       id="btnEditar"
                     >
                       Editar
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => eliminarCliente(itemProveedor.id)}
-                      type="submit"
-                      id="btnEliminar"
-                    >
-                      Eliminar
                     </button>
                   </td>
                 </tr>

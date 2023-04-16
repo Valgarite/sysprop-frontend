@@ -130,14 +130,14 @@ function Inventario() {
       {/* <!--CUERPO--> */}
       <div id="cuerpo">
         <div className="row p-4">
-          <h3>Buscar Articulo</h3>
+          <h3>Buscar Artículo</h3>
           <div className="col-6">
             <input
               type="text"
               className="form-control"
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="Buscar Articulo..."
+              placeholder="Buscar Artículo..."
             />
           </div>
           <div className="col-3"></div>

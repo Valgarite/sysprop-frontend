@@ -94,7 +94,6 @@ const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
   window.location.reload();
 };
 
-var editClienteId = -1;
 
 function Clientes() {
   const itemCliente = DataFetching(
@@ -106,7 +105,7 @@ function Clientes() {
   const [cedula, setCedula] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
-  
+  const [clienteEdit, setClienteEdit] = useState(-1)
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -128,16 +127,14 @@ function Clientes() {
     setSearchQuery(event.target.value);
   };
 
-  var clienteIndex; // Variable para almacenar el ID del cliente que se modificará
-
   function editarClick(id) {
-    editClienteId = itemCliente[id].id;
-    clienteIndex = id;
+    const clientesActivos = filteredUsuarios.filter((itemCliente) => itemCliente.estado_activo)
+    setClienteEdit(clientesActivos[id].id)
 
-    setNombre(itemCliente[clienteIndex].nombre);
-    setCedula(itemCliente[clienteIndex].cedula);
-    setTelefono(itemCliente[clienteIndex].telefono);
-    setDireccion(itemCliente[clienteIndex].direccion);
+    setNombre(clientesActivos[id].nombre);
+    setCedula(clientesActivos[id].cedula);
+    setTelefono(clientesActivos[id].telefono);
+    setDireccion(clientesActivos[id].direccion);
 
     handleEditar();
     handleShow();
@@ -295,14 +292,6 @@ function Clientes() {
                       >
                         Editar
                       </button>
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => eliminarCliente(itemCliente.id)}
-                        type="submit"
-                        id="btnEliminar"
-                      >
-                        Eliminar
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -328,7 +317,7 @@ function Clientes() {
                   type="text"
                   className="form-control"
                   id="nombre"
-                  defaultValue={action === 1 ? null : nombre}
+                  defaultValue={action === 1 ? "" : nombre}
                   value={nombre}
                   required
                   //onChange={(event) => setNombre(event.target.value)}
@@ -408,7 +397,7 @@ function Clientes() {
                 className="btn btn-success"
                 onClick={() => {
                   editarCliente(
-                    editClienteId,
+                    clienteEdit,
                     nombre,
                     cedula,
                     telefono,

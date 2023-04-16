@@ -695,4 +695,4 @@ function Compras() {
   );
 }
 
-export default Compras
+export { Compras }
