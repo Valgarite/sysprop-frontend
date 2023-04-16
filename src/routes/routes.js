@@ -1,15 +1,15 @@
-import dashboard from "../pages/dashboard";
-import clientes from "../pages/clientes";
-import compras from "../pages/compras";
-import ayuda from "../pages/ayuda";
-import ventas from "../pages/ventas";
-import usuarios from "../pages/usuarios";
-import inventario from "../pages/inventario";
-import proveedores from "../pages/proveedores";
-import mantenimiento from "../pages/mantenimiento";
+import Dashboard from "../pages/Dashboard";
+import Clientes from "../pages/Clientes";
+import { Compras } from "../pages/compras";
+import Ayuda from "../pages/Ayuda";
+import Ventas from "../pages/Ventas";
+import Usuarios from "../pages/Usuarios";
+import Inventario from "../pages/Inventario";
+import Proveedores from "../pages/Proveedores";
+import Mantenimiento from "../pages/Mantenimiento";
 import { Login } from "../pages/Login";
-import reportes from "../pages/reportes";
-import plantilla from "../pages/plantilla";
+import Reportes from "../pages/Reportes";
+import Plantilla from "../pages/Plantilla";
 
 
 const routes = [
@@ -21,65 +21,63 @@ const routes = [
     {
       title: 'Dashboard',
       path: '/dashboard',
-      component: dashboard,
+      component: Dashboard,
     },
     {
       title: 'Clientes',
       path: '/clientes',
-      component: clientes,
+      component: Clientes,
     },
     {
       title: 'Compras',
-      path: '/Compras',
-      component: compras,
+      path: '/compras',
+      component: Compras,
     },
     {
       title: 'Ventas',
       path: '/ventas',
-      component: ventas,
+      component: Ventas,
     },
     {
       title: 'Inventario',
       path: '/inventario',
-      component: inventario,
+      component: Inventario,
     },
     {
       title: 'Proveedores',
       path: '/proveedores',
-      component: proveedores,
+      component: Proveedores,
     },
     {
       title: 'Usuarios',
       path: '/usuarios',
-      component: usuarios,
+      component: Usuarios,
     },
     {
       title: 'Mantenimiento',
       path: '/mantenimiento',
-      component: mantenimiento,
+      component: Mantenimiento,
     },
     {
       title: 'Ayuda',
       path: '/ayuda',
-      component: ayuda,
+      component: Ayuda,
     },
     {
       title: 'Reportes',
       path: '/reportes',
-      component: reportes,
+      component: Reportes,
     },
     {
       title: 'Plantilla',
       path: '/plantilla',
-      component: plantilla,
+      component: Plantilla,
     },
     {
       title: 'Home',
       path: '/',
       component: Login
     }
-
-
   ];
   
   export default routes;

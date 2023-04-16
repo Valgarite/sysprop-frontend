@@ -5,7 +5,6 @@ import {
   Switch,
 } from 'react-router-dom'
 import routes from './routes/routes';
-import Dashboard from './pages/dashboard';
 
 function App() {
   
@@ -15,7 +14,6 @@ function App() {
         <Switch>
           {routes.map((route) => (<Route key={route.path} path={route.path} component={route.component}/>)
           )}
-          <Route path="/" component={Dashboard}/>
         </Switch>
       </Router>
     </React.Fragment>

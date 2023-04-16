@@ -1,7 +1,7 @@
 import React from 'react'
 import Sidebar from '../components/sidebar'
 
-function compras() {
+function Compras() {
   return (
     <>
       <Sidebar/>
@@ -10,4 +10,4 @@ function compras() {
   )
 }
 
-export default compras
+export { Compras }
