@@ -1,15 +1,15 @@
 import { Dashboard } from "../pages/dashboard";
-import Clientes from "../pages/Clientes";
+import Clientes from "../pages/clientes";
 import { Compras } from "../pages/compras";
-import Ayuda from "../pages/Ayuda";
-import Ventas from "../pages/Ventas";
-import Usuarios from "../pages/Usuarios";
-import Inventario from "../pages/Inventario";
-import Proveedores from "../pages/Proveedores";
-import Mantenimiento from "../pages/Mantenimiento";
+import Ayuda from "../pages/ayuda";
+import Ventas from "../pages/ventas";
+import Usuarios from "../pages/usuarios";
+import Inventario from "../pages/inventario";
+import Proveedores from "../pages/proveedores";
+import Mantenimiento from "../pages/mantenimiento";
 import { Login } from "../pages/Login";
-import Reportes from "../pages/Reportes";
-import Plantilla from "../pages/Plantilla";
+import Reportes from "../pages/reportes";
+import Plantilla from "../pages/plantilla";
 
 
 const routes = [
