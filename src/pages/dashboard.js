@@ -9,7 +9,7 @@ import logoEmpresa from '../assets/images/logo-gelato.png'
 
 const cookies = new Cookies()
 
-const HomeScreen = () => {
+const Dashboard = () => {
   
   const userData = {
     nombre: cookies.get('nombre'),
@@ -117,4 +117,4 @@ const HomeScreen = () => {
   );
 };
 
-export default HomeScreen;
+export { Dashboard };

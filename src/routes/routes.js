@@ -1,4 +1,4 @@
-import Dashboard from "../pages/Dashboard";
+import { Dashboard } from "../pages/Dashboard";
 import Clientes from "../pages/Clientes";
 import { Compras } from "../pages/compras";
 import Ayuda from "../pages/Ayuda";
