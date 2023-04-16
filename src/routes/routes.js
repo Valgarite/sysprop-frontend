@@ -73,6 +73,11 @@ const routes = [
       path: '/plantilla',
       component: plantilla,
     },
+    {
+      title: 'Home',
+      path: '/',
+      component: Login
+    }
 
 
   ];
