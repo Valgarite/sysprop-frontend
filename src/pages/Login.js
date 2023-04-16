@@ -1,4 +1,4 @@
-import React, { useEffect, useState , Link , Component } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import image from '../assets/images/logo-gelato.png'
 import Cookies from 'universal-cookie'
@@ -11,7 +11,8 @@ let isAuth = false
 function Login() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-
+  const [attempts, setAttempts] = useState(0);
+  const [blocked, setBlocked] = useState(false);
   const handleChangeUser = async e => {
     setUsername(e.target.value)
   }
@@ -45,7 +46,15 @@ function Login() {
             cookies.set('estadoActivo', usuario.estado_activo, {path: "/"})
             cookies.set('cargo', usuario.cargo, {path: "/"})
             window.location.href="/dashboard"
+          } else {
+            setAttempts(attempts + 1);
+            if (attempts === 2) {
+              const unlockTime = Date.now() + 3 * 60 * 60 * 60; // 20? in milliseconds
+              localStorage.setItem('unlockTime', unlockTime);
+              setBlocked(true);
+            }
           }
+          return 0
         })
       })
       .catch((error) => {
@@ -70,8 +79,8 @@ function Login() {
         <form class="login-form">
           <input name="username" type="text" placeholder="Nombre de usuario" onChange={handleChangeUser}/>
           <input name="password" type="password" placeholder="Contraseña" onChange={handleChangePassword}/>
-          <button formMethod='post' type="button" onClick={iniciarSesion}>
-              Iniciar Sesión
+          <button disable={blocked} formMethod='post' type="button" onClick={iniciarSesion}>
+              {blocked ? 'Block for 20 min' : 'Iniciar Sesion'}
           </button>
           <button type="button">Recuperar Contraseña</button>
         </form>
