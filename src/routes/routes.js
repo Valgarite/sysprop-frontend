@@ -1,4 +1,4 @@
-import { Dashboard } from "../pages/Dashboard.js";
+import { Dashboard } from "../pages/dashboard";
 import Clientes from "../pages/Clientes";
 import { Compras } from "../pages/compras";
 import Ayuda from "../pages/Ayuda";
