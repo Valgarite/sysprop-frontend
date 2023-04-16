@@ -2,7 +2,11 @@ Frontend cortesía de:
 -Julio Pacheco: github.com/juliopachecom
 -Daniel Sandrea: github.com/zcheniel
 -Jonathan Núñez: github.com/jonadavid13
+-Juan David González: github.com/Dakh4r
 
 Con la participación especial de: José Portillo: github.com/yu13ppe
+
+Backend realizado por:
+-Carlos Gutierrez: https://github.com/Valgarite
 
 Repositorio de backend ubicado en: https://github.com/Valgarite/sysprop

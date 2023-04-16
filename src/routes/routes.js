@@ -1,4 +1,4 @@
-import { Dashboard } from "../pages/Dashboard";
+import { Dashboard } from "../pages/Dashboard.js";
 import Clientes from "../pages/Clientes";
 import { Compras } from "../pages/compras";
 import Ayuda from "../pages/Ayuda";
@@ -20,57 +20,57 @@ const routes = [
     },
     {
       title: 'Dashboard',
-      path: '/dashboard',
+      path: '/Dashboard',
       component: Dashboard,
     },
     {
       title: 'Clientes',
-      path: '/clientes',
+      path: '/Clientes',
       component: Clientes,
     },
     {
       title: 'Compras',
-      path: '/compras',
+      path: '/Compras',
       component: Compras,
     },
     {
       title: 'Ventas',
-      path: '/ventas',
+      path: '/Ventas',
       component: Ventas,
     },
     {
       title: 'Inventario',
-      path: '/inventario',
+      path: '/Inventario',
       component: Inventario,
     },
     {
       title: 'Proveedores',
-      path: '/proveedores',
+      path: '/Proveedores',
       component: Proveedores,
     },
     {
       title: 'Usuarios',
-      path: '/usuarios',
+      path: '/Usuarios',
       component: Usuarios,
     },
     {
       title: 'Mantenimiento',
-      path: '/mantenimiento',
+      path: '/Mantenimiento',
       component: Mantenimiento,
     },
     {
       title: 'Ayuda',
-      path: '/ayuda',
+      path: '/Ayuda',
       component: Ayuda,
     },
     {
       title: 'Reportes',
-      path: '/reportes',
+      path: '/Reportes',
       component: Reportes,
     },
     {
       title: 'Plantilla',
-      path: '/plantilla',
+      path: '/Plantilla',
       component: Plantilla,
     },
     {
