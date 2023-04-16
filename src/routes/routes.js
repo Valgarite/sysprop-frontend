@@ -8,6 +8,9 @@ import inventario from "../pages/inventario";
 import proveedores from "../pages/proveedores";
 import mantenimiento from "../pages/mantenimiento";
 import { Login } from "../pages/Login";
+import reportes from "../pages/reportes";
+import plantilla from "../pages/plantilla";
+
 
 const routes = [
     {
@@ -60,6 +63,17 @@ const routes = [
       path: '/ayuda',
       component: ayuda,
     },
+    {
+      title: 'Reportes',
+      path: '/reportes',
+      component: reportes,
+    },
+    {
+      title: 'Plantilla',
+      path: '/plantilla',
+      component: plantilla,
+    },
+
 
   ];
   

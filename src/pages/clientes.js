@@ -6,7 +6,7 @@ import "../assets/styles.scss";
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
 
-const cookies = new Cookies()
+const cookies = new Cookies();
 
 async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
   if (!nombre || !cedula || !telefono || !direccion) {
@@ -106,15 +106,16 @@ function Clientes() {
   const [cedula, setCedula] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
+  
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   const Redireccion = () => {
-    if(!cookies.get('id')){
-      window.location.href="/login"
+    if (!cookies.get("id")) {
+      window.location.href = "/login";
     }
-  }
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -147,9 +148,9 @@ function Clientes() {
     handleShow();
   }
 
-  useEffect(()=>{
-    Redireccion()
-  },[])
+  useEffect(() => {
+    Redireccion();
+  }, []);
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
@@ -230,8 +231,8 @@ function Clientes() {
 
   return (
     <div>
-    <Sidebar/>
-    
+      <Sidebar />
+
       {/* <!--CUERPO--> */}
       <div id="cuerpo">
         <div className="row p-4">
@@ -269,40 +270,42 @@ function Clientes() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsuarios.map((itemCliente, id) => (
-                <tr key={id}>
-                  <td
-                    className={
-                      itemCliente.estado_activo ? "activo" : "desactivo"
-                    }
-                  >
-                    {itemCliente.id}
-                  </td>
-                  <td>{itemCliente.nombre}</td>
-                  <td>{itemCliente.cedula}</td>
-                  <td>{itemCliente.telefono}</td>
-                  <td>{itemCliente.direccion}</td>
-                  <td>
-                    <button
-                      className="btn btn-warning"
-                      onClick={function editClick() {
-                        editarClick(id);
-                      }}
-                      id="btnEditar"
+              {filteredUsuarios
+                .filter((itemCliente) => itemCliente.estado_activo)
+                .map((itemCliente, id) => (
+                  <tr key={id}>
+                    <td
+                      className={
+                        itemCliente.estado_activo ? "activo" : "desactivo"
+                      }
                     >
-                      Editar
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => eliminarCliente(itemCliente.id)}
-                      type="submit"
-                      id="btnEliminar"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      {itemCliente.id}
+                    </td>
+                    <td>{itemCliente.nombre}</td>
+                    <td>{itemCliente.cedula}</td>
+                    <td>{itemCliente.telefono}</td>
+                    <td>{itemCliente.direccion}</td>
+                    <td>
+                      <button
+                        className="btn btn-warning"
+                        onClick={function editClick() {
+                          editarClick(id);
+                        }}
+                        id="btnEditar"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => eliminarCliente(itemCliente.id)}
+                        type="submit"
+                        id="btnEliminar"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -433,3 +436,53 @@ function Clientes() {
 }
 
 export default Clientes;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/********MMGVO PACHECO */
+
+
+
+
+
+
+
+
+
+
+
+

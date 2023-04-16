@@ -1,6 +1,6 @@
 import React, { useEffect, useState , Link , Component } from 'react'
 import axios from 'axios'
-import image from '../assets/images/image.png'
+import image from '../assets/images/logo-gelato.png'
 import Cookies from 'universal-cookie'
 
 const baseUrl = "https://sysprop-production.up.railway.app/usuarios"

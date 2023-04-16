@@ -1,0 +1,23 @@
+.imagenbonitaparaformulario {
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-width: 100px;
+    padding-right: 25%;
+    padding-top: 2px;
+}
+
+.imagenbonitaparaformulario img {
+    max-width: 200px;
+}
+#cuerpo {
+    padding: 10px;
+}
+.row {
+    padding: 0;
+    --bs-gutter-x: 0rem;
+}
+#botonplantilla{
+    margin-left: 140px;
+    margin-bottom: 30px;
+}

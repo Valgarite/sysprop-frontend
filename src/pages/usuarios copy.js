@@ -102,8 +102,7 @@ const editarUsuario = async (id, nombre, cedula, fechaNacimiento, correo, userna
       }
     );
   } catch (error) {
-    console.log("Error al registrar la venta:", error);
-    alert(`Ocurrió un error al registrar la venta. ${error.response.data.message}`);
+    console.log(error);
   }
 
   window.location.reload();

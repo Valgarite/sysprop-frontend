@@ -16,6 +16,7 @@ import {
 } from "reactstrap";
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
+import { Link } from 'react-router-dom';
 
 const cookies = new Cookies()
 
@@ -57,21 +58,24 @@ async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
 }
 
 async function agregarVenta(idUsuario, idCliente, listaArticulos, listaCantidades) {
-  await axios
-    .post("https://sysprop-production.up.railway.app/ventas/registrar", {
+  try {
+    await axios.post("https://sysprop-production.up.railway.app/ventas/registrar", {
       idusuario: idUsuario,
       idcliente: idCliente,
       articulos: listaArticulos,
       cantidades: listaCantidades,
-    })
-    .then((res) => console.log("posting data", res))
-    .catch((err) => console.log(err));
-  window.location.reload();
+    });
+    console.log("Venta registrada correctamente");
+    window.location.reload();
+  } catch (error) {
+    console.log("Error al registrar la venta:", error);
+    alert(`Ocurrió un error al registrar la venta. ${error.response.data.message}`);
+  }
 }
 
 
 
-var actualCliente = { 
+var actualCliente = {
   nombre: "Nombre de cliente",
   cedula: "",
   id: 0,
@@ -96,7 +100,7 @@ function Ventas() {
   const handleSelectChange = (selectedOption) => {
     setSelectedOption(selectedOption);
     document.getElementById('cedula').value = selectedOption.value;
-    actualCliente = clientes.find(function(cliente){
+    actualCliente = clientes.find(function (cliente) {
       return cliente.cedula === selectedOption.value
     })
   };
@@ -128,13 +132,15 @@ function Ventas() {
         console.log(error);
       });
 
-      // Peticion GET a Clientes
-      fetch("https://sysprop-production.up.railway.app/clientes")
+    // Peticion GET a Clientes
+    fetch("https://sysprop-production.up.railway.app/clientes")
       .then((response) => response.json())
       .then((data) => {
         setClientes(data);
       })
   }, []);
+
+  
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
@@ -150,16 +156,24 @@ function Ventas() {
     setTotal(total);
   }, [selectedProducts, productos, handleSelectChange]);
 
-  const handleCheck = (productId) => {
+  function returnCantidades(idProducto, productoPrecio) {
+    const checkedProducto =
+      detalleProductos.find((articulo) =>
+        idProducto === articulo.id
+      );
+    if (checkedProducto) {
+      return checkedProducto.cantidad * productoPrecio + " Bs.";
+    } else {
+      return "0 Bs.";
+    }
+  }
+
+  const handleCheck = (productId, checked) => {
     setSelectedProducts((prevSelectedProducts) => {
-      if (prevSelectedProducts.includes(productId)) {
-        const newDetalleProductos = detalleProductos.filter(
-          (p) => p.id !== productId
-        );
-        setDetalleProductos(newDetalleProductos);
-        return prevSelectedProducts.filter((id) => id !== productId);
-      } else {
+      if (checked) {
+        // Checkbox is checked, add product to selected products
         const productoSeleccionado = productos.find((p) => p.id === productId);
+        const cantidad = productoSeleccionado.cantidad || 1
         const newDetalleProductos = [
           ...detalleProductos,
           { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad },
@@ -175,6 +189,11 @@ function Ventas() {
         }
         setDetalleProductos(nuevosDetalles);
         return [...prevSelectedProducts, productId];
+      } else {
+        // Checkbox is unchecked, remove product from selected products
+        const newDetalleProductos = detalleProductos.filter((p) => p.id !== productId);
+        setDetalleProductos(newDetalleProductos);
+        return prevSelectedProducts.filter((id) => id !== productId);
       }
     });
   };
@@ -192,7 +211,7 @@ function Ventas() {
       setNombre("");
     }
   };
-  
+
   function agregarClick() {
     handleAgregar();
     handleShow();
@@ -228,10 +247,10 @@ function Ventas() {
     } catch (error) {
       console.log(error);
     }
-  
+
     window.location.reload();
   };
-  
+
   var editClienteId = -1;
 
   /******************************************/
@@ -246,6 +265,10 @@ function Ventas() {
       setCedula("");
     }
   };
+
+
+
+
 
   /******************************************/
   /*************VALIDAR TELEFONO*******************/
@@ -275,21 +298,21 @@ function Ventas() {
   /******************************************/
 
   const preConfirmar = async () => {
-    if((actualCliente.id > 0) && (detalleProductos.length > 0)){
+    if ((actualCliente.id > 0) && (detalleProductos.length > 0)) {
       {
-        detalleProductos.map((producto)=>{
+        detalleProductos.map((producto) => {
           articulosSeleccionados.push(producto.nombre)
           articulosCantidades.push(parseInt(producto.cantidad))
         })
       }
       handleConfirm() // Redirecciona al Modal de Confirmación
-    } else if(actualCliente.id === 0) {
+    } else if (actualCliente.id === 0) {
       alert("Se debe seleccionar un cliente")
-    } else if (detalleProductos.length === 0){
+    } else if (detalleProductos.length === 0) {
       alert("No se han seleccionado articulos ")
     }
 
-  }  
+  }
 
   return (
     <>
@@ -298,15 +321,15 @@ function Ventas() {
         <div id="cuerpo">
           <div className="m-4 row">
             <h3>Registro de venta</h3>
-            <div className="col-6">
-              <Button color="primary">Visualizar Ventas</Button>
+            <div className="hijueputabton">
+            <Link to = "/reportes"><Button color="primary">Visualizar Ventas</Button></Link>
             </div>
           </div>
           <Row>
             <Col sm={8}>
               <Row className="mb-2 mt-5">
                 <Col sm={12}>
-                  <Card>
+                  <Card className="cliente-card">
                     <CardHeader
                       style={{ backgroundColor: "#4e73df", color: "white" }}
                     >
@@ -325,6 +348,7 @@ function Ventas() {
                           <FormGroup>
                             <Label>Nombre</Label>
                             <Select
+                              className="me-3"
                               filterOption={(option, searchText) =>
                                 option.label
                                   .toLowerCase()
@@ -352,7 +376,7 @@ function Ventas() {
               </Row>
               <Row>
                 <Col sm={12}>
-                  <Card>
+                  <Card className="productos-card">
                     <CardHeader
                       style={{ backgroundColor: "#4e73df", color: "white" }}
                     >
@@ -384,64 +408,84 @@ function Ventas() {
                               </tr>
                             </thead>
                             <tbody>
-                              {productosFiltrados.map((producto) => (
+                              {productosFiltrados.filter(uten => uten.categoria !== "Utensilios").map((producto) => (
                                 <tr key={producto.id}>
                                   <td>
                                     <Input
                                       type="checkbox"
                                       bsSize="md"
-                                      checked={selectedProducts.includes(
-                                        producto.id
-                                      )}
-                                      onChange={() => handleCheck(producto.id)}
+                                      checked={selectedProducts.includes(producto.id)}
+                                      onChange={(e) => handleCheck(producto.id, e.target.checked)}
                                     />
                                   </td>
                                   <td>{producto.nombre}</td>
                                   <td>
                                     <FormGroup>
                                       <Input
+                                      className="inputProductos"
+                                        maxLength={2}
+                                        disabled={!selectedProducts.includes(producto.id)}
                                         type="number"
                                         defaultValue={0}
                                         onChange={(e) => {
-                                          const nuevosProductos = [
-                                            ...productos,
-                                          ];
-                                          const index =
-                                            nuevosProductos.indexOf(producto);
-                                          nuevosProductos[index] = {
-                                            ...producto,
-                                            cantidad: e.target.value,
-                                          };
-                                          setProductos(nuevosProductos);
+                                          const newValue = e.target.value;
+                                          
+                                          if (
+                                            selectedProducts.includes(producto.id) &&
+                                            (newValue === "" || newValue >= 1)                    
+                                          ) {
+                                            handleCheck(producto.id, true)
+                                            const nuevosProductos = [...productos];
+                                            const index = nuevosProductos.indexOf(producto);
+                                            nuevosProductos[index] = {
+                                              ...producto,
+                                              cantidad: newValue || 1,
+                                            };
+                                            setProductos(nuevosProductos);
 
-                                          const nuevosDetalles = [
-                                            ...detalleProductos,
-                                          ];
-                                          const detalleIndex =
-                                            nuevosDetalles.findIndex(
+                                            const nuevosDetalles = [...detalleProductos];
+                                            const detalleIndex = nuevosDetalles.findIndex(
                                               (p) => p.id === producto.id
                                             );
-                                          if (detalleIndex !== -1) {
-                                            nuevosDetalles[
-                                              detalleIndex
-                                            ].cantidad = e.target.value;
+                                            if (detalleIndex !== -1) {
+                                              nuevosDetalles[detalleIndex].cantidad = newValue;
+                                            } else {
+                                              nuevosDetalles.push({
+                                                ...producto,
+                                                cantidad: newValue,
+                                              });
+                                            }
+                                            setDetalleProductos(nuevosDetalles);
                                           } else {
-                                            nuevosDetalles.push({
-                                              ...producto,
-                                              cantidad: e.target.value,
-                                            });
+                                            // Si el valor ingresado no es una cadena vacía o mayor a 1, se asigna el valor 1 al input
+                                            handleCheck(producto.id, false)
+                                            e.target.value = 1;
                                           }
-                                          setDetalleProductos(nuevosDetalles);
                                         }}
+                                        onKeyDown={(e) => {
+                                          // Se valida que no se escriba el símbolo "-"
+                                          if ((e.key === "-") || (e.key === "")) {
+                                            e.preventDefault();
+                                          }
+                                          // Expresión regular para validar si el valor ingresado cumple con la condición de permitir el número 0 solo si está seguido por otro número
+                                          const regex = /[1-9]\d*/;
+                                          if (!regex.test(e.target.value + e.key)) {
+                                            e.preventDefault();
+                                          }
+                                        }}
+
                                       />
+
                                     </FormGroup>
                                   </td>
                                   <td>
                                     <span>{producto.precio + " Bs."}</span>
                                   </td>
                                   <td>
-                                    {producto.cantidad * producto.precio +
-                                      " Bs."}
+                                    {   //Funcion para buscar los articulos seleccionados y mostrar el Total correspondiente a cada uno.
+                                         // Nombre provisional de 'articulo' para no confundir con el 'producto' del mapeo principal
+                                        returnCantidades(producto.id, producto.precio)
+                                    }
                                   </td>
                                 </tr>
                               ))}
@@ -455,7 +499,7 @@ function Ventas() {
               </Row>
             </Col>
 
-            <Col sm={4} className="detalle-venta">
+            <Col sm={4} className="detalle-venta-col">
               <div className="sticky-top">
                 <Row className="mb-2 mx-2">
                   <Col sm={12}>
@@ -473,18 +517,22 @@ function Ventas() {
                                 <tr>
                                   <td className="fw-semibold">Artí­culo</td>
                                   <td className="fw-semibold">Cantidad</td>
-                                  <td className="fw-semibold">Precio</td>
+                                  <td className="fw-semibold">Precio Unit.</td>
+                                  <td className="fw-semibold">Precio total</td>
                                 </tr>
                                 {detalleProductos.map((producto) => (
                                   <tr key={producto.id}>
                                     <td>{producto.nombre}</td>
-                                    <td>{producto.cantidad}</td>
-                                    <td>{producto.precio}</td>
+                                    <td className="columna-numerica">{producto.cantidad || 1}</td>
+                                    <td className="columna-numerica">{producto.precio}</td>
+                                    <td className="columna-numerica">{ (producto.cantidad || 1) * producto.precio}</td>
                                   </tr>
                                 ))}
                                 <tr>
-                                  <td>Total:</td>
-                                  <td>{total}</td>
+                                  <td className="fw-semibold">Total:</td>
+                                  <td className></td>
+                                  <td className></td>
+                                  <td className="fw-semibold">{"Bs. "+total}</td>
                                 </tr>
                               </tbody>
                             </Table>
@@ -548,7 +596,7 @@ function Ventas() {
                         {detalleProductos.map((producto) => (
                           <tr key={producto.id}>
                             <td>{producto.nombre}</td>
-                            <td>{producto.cantidad}</td>
+                            <td>{producto.cantidad || 1}</td>
                             <td>{producto.precio}</td>
                           </tr>
                         ))}
@@ -569,7 +617,7 @@ function Ventas() {
               className="btn btn-primary"
               data-bs-dismiss="modal"
               onClick={
-                ()=> agregarVenta(usuarioActual, actualCliente.id, articulosSeleccionados, articulosCantidades)
+                () => agregarVenta(usuarioActual, actualCliente.id, articulosSeleccionados, articulosCantidades)
               }
             >
               Registrar venta
@@ -579,7 +627,7 @@ function Ventas() {
               type="button"
               className="btn btn-secondary"
               data-bs-dismiss="modal"
-              onClick={function cancelarVenta(){
+              onClick={function cancelarVenta() {
                 articulosSeleccionados = []
                 articulosCantidades = []
                 handleConfirmClose()
@@ -663,22 +711,22 @@ function Ventas() {
                 </div>
               </div>
               {/* <!--<button type="submit" className="btn btn-primary mt-3">Agregar</button>--> */}
-                <button
-                  id="agregar"
-                  type="button"
-                  onClick={() =>
-                    agregarCliente(
-                      "https://sysprop-production.up.railway.app/clientes",
-                      nombre,
-                      cedula,
-                      telefono,
-                      direccion
-                    )
-                  }
-                  className="btn btn-primary"
-                >
-                  Agregar
-                </button>
+              <button
+                id="agregar"
+                type="button"
+                onClick={() =>
+                  agregarCliente(
+                    "https://sysprop-production.up.railway.app/clientes",
+                    nombre,
+                    cedula,
+                    telefono,
+                    direccion
+                  )
+                }
+                className="btn btn-primary"
+              >
+                Agregar
+              </button>
             </form>
             <button
               id="cerrar"
