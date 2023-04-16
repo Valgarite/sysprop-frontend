@@ -92,13 +92,9 @@ function Ventas() {
   const [busqueda, setBusqueda] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [total, setTotal] = useState(0);
-  const [showModal, setShowModal] = useState(false)
   const [confirmarVenta, setConfirmarVenta] = useState(false)
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [nombreCliente, setNombreCliente] = useState(null);
 
   const handleSelectChange = (selectedOption) => {
-    setSelectedOption(selectedOption);
     document.getElementById('cedula').value = selectedOption.value;
     actualCliente = clientes.find(function (cliente) {
       return cliente.cedula === selectedOption.value
@@ -111,12 +107,7 @@ function Ventas() {
   const [direccion, setDireccion] = useState("");
 
   const [detalleProductos, setDetalleProductos] = useState([]);
-  const [cantidadesProductos, setCantidadesProductos] = useState([])
   const [clientes, setClientes] = useState([])
-
-  const handleModalSeleccionar = () => setShowModal(true);
-  const handleModalAgregar = () => setShowModal(2);
-  const closeModal = () => setShowModal(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleConfirm = () => setConfirmarVenta(true);
@@ -140,7 +131,7 @@ function Ventas() {
       })
   }, []);
 
-  
+
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
@@ -154,7 +145,7 @@ function Ventas() {
       0
     );
     setTotal(total);
-  }, [selectedProducts, productos, handleSelectChange]);
+  }, [selectedProducts, productos]);
 
   function returnCantidades(idProducto, productoPrecio) {
     const checkedProducto =
@@ -173,7 +164,6 @@ function Ventas() {
       if (checked) {
         // Checkbox is checked, add product to selected products
         const productoSeleccionado = productos.find((p) => p.id === productId);
-        const cantidad = productoSeleccionado.cantidad || 1
         const newDetalleProductos = [
           ...detalleProductos,
           { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad },
@@ -216,42 +206,6 @@ function Ventas() {
     handleAgregar();
     handleShow();
   }
-
-  const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
-    if (!nombre || !cedula || !telefono || !direccion) {
-      alert("Todos los campos son obligatorios");
-      return;
-    }
-    if (cedula.length < 8 || cedula.length > 12) {
-      alert("Cedula Invalida");
-      return;
-    }
-    if (nombre.length < 3 || nombre.length > 64) {
-      alert("Nombre Invalido");
-      return;
-    }
-    if (telefono.length <= 10 || telefono.length >= 12) {
-      alert("Telefono Invalida");
-      return;
-    }
-    try {
-      await axios.put(
-        `https://sysprop-production.up.railway.app/clientes/${id}`,
-        {
-          nombre: nombre,
-          cedula: cedula,
-          telefono: telefono,
-          direccion: direccion,
-        }
-      );
-    } catch (error) {
-      console.log(error);
-    }
-
-    window.location.reload();
-  };
-
-  var editClienteId = -1;
 
   /******************************************/
   /*************VALIDAR CEDULA*******************/
@@ -299,12 +253,12 @@ function Ventas() {
 
   const preConfirmar = async () => {
     if ((actualCliente.id > 0) && (detalleProductos.length > 0)) {
-      {
-        detalleProductos.map((producto) => {
-          articulosSeleccionados.push(producto.nombre)
-          articulosCantidades.push(parseInt(producto.cantidad))
-        })
-      }
+
+      detalleProductos.forEach(producto => {
+        articulosSeleccionados.push(producto.nombre);
+        articulosCantidades.push(parseInt(producto.cantidad));
+      });
+
       handleConfirm() // Redirecciona al Modal de Confirmación
     } else if (actualCliente.id === 0) {
       alert("Se debe seleccionar un cliente")
@@ -322,7 +276,7 @@ function Ventas() {
           <div className="m-4 row">
             <h3>Registro de venta</h3>
             <div className="hijueputabton">
-            <Link to = "/reportes"><Button color="primary">Visualizar Ventas</Button></Link>
+              <Link to="/reportes"><Button color="primary">Visualizar Ventas</Button></Link>
             </div>
           </div>
           <Row>
@@ -422,17 +376,17 @@ function Ventas() {
                                   <td>
                                     <FormGroup>
                                       <Input
-                                      className="inputProductos"
+                                        className="inputProductos"
                                         maxLength={2}
                                         disabled={!selectedProducts.includes(producto.id)}
                                         type="number"
                                         defaultValue={0}
                                         onChange={(e) => {
                                           const newValue = e.target.value;
-                                          
+
                                           if (
                                             selectedProducts.includes(producto.id) &&
-                                            (newValue === "" || newValue >= 1)                    
+                                            (newValue === "" || newValue >= 1)
                                           ) {
                                             handleCheck(producto.id, true)
                                             const nuevosProductos = [...productos];
@@ -483,8 +437,8 @@ function Ventas() {
                                   </td>
                                   <td>
                                     {   //Funcion para buscar los articulos seleccionados y mostrar el Total correspondiente a cada uno.
-                                         // Nombre provisional de 'articulo' para no confundir con el 'producto' del mapeo principal
-                                        returnCantidades(producto.id, producto.precio)
+                                      // Nombre provisional de 'articulo' para no confundir con el 'producto' del mapeo principal
+                                      returnCantidades(producto.id, producto.precio)
                                     }
                                   </td>
                                 </tr>
@@ -525,14 +479,14 @@ function Ventas() {
                                     <td>{producto.nombre}</td>
                                     <td className="columna-numerica">{producto.cantidad || 1}</td>
                                     <td className="columna-numerica">{producto.precio}</td>
-                                    <td className="columna-numerica">{ (producto.cantidad || 1) * producto.precio}</td>
+                                    <td className="columna-numerica">{(producto.cantidad || 1) * producto.precio}</td>
                                   </tr>
                                 ))}
                                 <tr>
                                   <td className="fw-semibold">Total:</td>
                                   <td className></td>
                                   <td className></td>
-                                  <td className="fw-semibold">{"Bs. "+total}</td>
+                                  <td className="fw-semibold">{"Bs. " + total}</td>
                                 </tr>
                               </tbody>
                             </Table>

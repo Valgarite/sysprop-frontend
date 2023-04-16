@@ -35,13 +35,12 @@ async function agregarUsuario(ruta, nombre, cedula, fechaNacimiento, correo, use
     alert("Esta cedula ya se encuentra registrada.");
     return;
   }
-  const user = await axios.get(ruta);
   const usernameExistente = clientes.data.filter(
-    (user) => clientes.user === username
+    () => clientes.user === username
   );
   if (usernameExistente.length > 0) {
     alert("Esta nombre de usuario ya esta registrado.");
-    return;
+    return
   }
   await axios
     .post(ruta, {

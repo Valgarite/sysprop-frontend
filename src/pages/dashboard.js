@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Container, Row, Col, Button } from 'reactstrap';
+import { useEffect } from 'react';
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
-import { Link  } from 'react-router-dom';
 import icon2 from "../assets/images/user-icon-2.png"
 import icon1 from "../assets/images/user-icon-1.png"
 import icon3 from "../assets/images/user-icon-gt.png"
@@ -11,27 +9,13 @@ import logoEmpresa from '../assets/images/logo-gelato.png'
 
 const cookies = new Cookies()
 
-const styles = {
-  title: {
-    textAlign: 'center',
-    margin: '50px 0',
-    fontSize: '66px',
-    fontWeight: 'bold',
-  },
-  LinkContainer: {
-    margin: '50px 0',
-  },
-};
-
-
 const HomeScreen = () => {
-  const [isUserAuthenticated, setUserState] = useState(false)
   
   const userData = {
     nombre: cookies.get('nombre'),
     cedula: cookies.get('cedula'), 
     cargo: cookies.get('cargo').nombre, 
-    icon: (cookies.get('cargo').id === 1) ? ( icon1 ) : ( (cookies.get('cargo').id===2) ? ( icon2) : icon3 )
+    icon: (cookies.get('cargo').id === 1) ? ( icon1 ) : ( (cookies.get('cargo').id===2) ? ( icon2) : (cookies.get('cargo').id===3 ? icon3 : iconDef)  )
   }
 
   const Redireccion = () => {
@@ -42,19 +26,6 @@ const HomeScreen = () => {
 
   useEffect(()=>{
     Redireccion()
-    userData.icon = () => {
-      if(userData.cargo==="Empleado"){
-        return icon1
-      }
-      else if(userData.cargo==="Administrador"){
-        return icon2
-      }
-      else if(userData.cargo==="Gerente"){
-        return icon3
-      } else {
-        return iconDef
-      }
-    }
 
   },[])
 
@@ -69,7 +40,7 @@ const HomeScreen = () => {
           </div>
 
           <div className='right-component'>
-            <img src={logoEmpresa} className='dashboard-logo'/>
+            <img src={logoEmpresa} alt='SysProp Logo' className='dashboard-logo'/>
           </div>
         </div>
 

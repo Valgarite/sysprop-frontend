@@ -1,17 +1,13 @@
-import React, { useState , useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie/cjs/Cookies";
 import icon2 from "../assets/images/user-icon-2.png"
-import icon1 from "../assets/images/user-icon-1.png"
-import icon3 from "../assets/images/user-icon-gt.png"
-import iconDef from "../assets/images/user-default.png"
 
 const cookies = new Cookies()
 
 const Sidebar = () => {
 	const [isExpanded, setExpendState] = useState(false);
-	const [isUserAuthenticated, setUserState] = useState(false)
-	const [userIcon, setUserIcon] = useState(iconDef)
+	const isUserAuthenticated = true
 
 	const menuItems = [
 		{
@@ -70,51 +66,20 @@ const Sidebar = () => {
 		},
 	];
 
-	const [userData, setUserData] = useState({
-		username: "userexample",
-		nombre: "Nombre Apellido",
-		idCargo: 0,
-		cargo: "Cargo",
+	const userData = {
+		username: cookies.get('username'),
+		nombre: cookies.get('nombre'),
+		idCargo: cookies.get('cargo').id,
+		cargo: cookies.get('cargo').nombre,
 		icon: icon2
-	})
+	};
+
+
 
 	const cerrarSesion = () => {
 		cookies.remove('id', {path: "/"})
 		window.location.href="/dashboard"
 	}
-
-	async function renderUserData(){
-		if(cookies.get('id')) {
-			setUserState(true)
-			
-			setUserData({
-				nombre: cookies.get('nombre'),
-				username: cookies.get('username'),
-				cargo: cookies.get('cargo').nombre,
-				idCargo: cookies.get('cargo').id
-			})
-			cookies.set('idCargo', userData.idCargo, {path: "/"})
-			
-			switch(userData.idCargo){
-				case 1:
-					setUserIcon(icon1)
-					break;
-				case 2:
-					setUserIcon(icon2)
-					break;
-				case 3:
-					setUserIcon(icon3)
-					break;
-				default:
-					setUserIcon(iconDef)
-				break;
-			}
-		}
-	}
-	
-	useEffect(() => {
-		renderUserData()
-	}, [document.getElementById("sidebar")]);
 
 	return (
 		<div
@@ -164,7 +129,7 @@ const Sidebar = () => {
 					<div className="nav-details">
 						<img
 							className="nav-footer-avatar"
-							src={userIcon}
+							src={userData.icon}
 							alt="Usuario"
 						/>
 						<div className="nav-footer-info">

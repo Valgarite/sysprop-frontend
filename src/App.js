@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   BrowserRouter as Router,
   Route,
@@ -6,11 +6,6 @@ import {
 } from 'react-router-dom'
 import routes from './routes/routes';
 import Dashboard from './pages/dashboard';
-
-// authState = () => {
-//   cookies.get('id') ? alert("AUTENTICADO") : alert("NEGATIVO") 
-// }
-var isOpen = true;
 
 function App() {
   
