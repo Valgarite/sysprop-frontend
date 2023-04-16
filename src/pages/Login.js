@@ -33,7 +33,6 @@ function Login() {
         },
       })
       .then((response) => {
-        console.log(response.data);
         response.data.map((usuario, id) => {
           if(usuario.username === username && usuario.password===password){
             isAuth = true
