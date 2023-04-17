@@ -387,7 +387,7 @@ function Ventas() {
                                     <FormGroup>
                                     <Input
                                         maxLength={2}
-                                        type="number"
+                                        type="text"
                                         defaultValue={producto.cantidad}
                                         onChange={(e) => {
                                           const newValue = e.target.value;
