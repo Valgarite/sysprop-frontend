@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import { DataFetching } from "../DataFetching";
 import "../assets/styles.scss";
 import Sidebar from "../components/sidebar";
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 async function agregarUsuario(ruta, nombre, cedula, fechaNacimiento, correo, username, password, cargo) {
   if (!nombre || !cedula || !correo || !username || !password) {
@@ -198,6 +201,16 @@ function Usuarios() {
       column: "Acciones",
     },
   ];
+
+  const Redireccion = () => {
+    if(!cookies.get('id')){
+      window.location.href="/login"
+    }
+  }
+
+  useEffect(()=>{
+    Redireccion()
+  },[])
 
   /*************VALIDAR NOMBRE*******************/
 

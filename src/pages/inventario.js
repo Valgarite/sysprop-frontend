@@ -11,6 +11,9 @@ import {
   ModalFooter,
   Input,
 } from "reactstrap";
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 function Inventario() {
   const [nombre, setNombre] = useState("");
@@ -43,7 +46,14 @@ function Inventario() {
     setSearchQuery(event.target.value);
   };
 
+  const Redireccion = () => {
+    if(!cookies.get('id')){
+      window.location.href="/login"
+    }
+  }
+
   useEffect(() => {
+    Redireccion()
     fetchData();
   }, []);
 

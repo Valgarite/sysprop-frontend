@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
 import icon2 from "../assets/images/user-icon-2.png"
@@ -10,12 +11,22 @@ import logoEmpresa from '../assets/images/logo-gelato.png'
 const cookies = new Cookies()
 
 const Dashboard = () => {
-  
+  const isAuth = (cookies.get('id')) ? true : false
+
+  const [ventasDia, setVentasDia] = useState(0)
+  const [ingresosDia, setIngresosDia] = useState(0)
+  const [articulosDisponibles, setArticulosDisponibles] = useState(0)
+  const [totalClientes, setTotalClientes] = useState(0)
+
   const userData = {
-    nombre: cookies.get('nombre'),
-    cedula: cookies.get('cedula'), 
-    cargo: cookies.get('cargo').nombre, 
-    icon: (cookies.get('cargo').id === 1) ? ( icon1 ) : ( (cookies.get('cargo').id===2) ? ( icon2) : (cookies.get('cargo').id===3 ? icon3 : iconDef)  )
+		nombre: isAuth ? cookies.get('nombre') : "Nombre del Usuario",
+    cedula: isAuth ? cookies.get('cedula') : "Cedula", 
+		cargo: isAuth ? cookies.get('cargo').nombre : "Cargo",
+    icon: isAuth ? ((cookies.get('cargo').id === 1) ? ( icon1 )
+     : ( (cookies.get('cargo').id===2) ? ( icon2)
+     : (cookies.get('cargo').id===3 ? icon3
+     : iconDef)))
+     : iconDef
   }
 
   const Redireccion = () => {
@@ -24,9 +35,31 @@ const Dashboard = () => {
     }
   }
 
-  useEffect(()=>{
-    Redireccion()
+  const loadInfo = async () => {
+    await axios.get("https://sysprop-production.up.railway.app/ventas/resumen")
+    .then((response) => { 
+      console.log(response)
+      setVentasDia(response.data.contador)
+      setIngresosDia(response.data.suma)
+    })
+    .catch((error) => console.log(error))
 
+    await axios.get("https://sysprop-production.up.railway.app/clientes/resumen")
+    .then((response) => { 
+      setTotalClientes(response.data.contador)
+    })
+    .catch((error) => console.log(error))
+
+    await axios.get("https://sysprop-production.up.railway.app/articulos/resumen")
+    .then((response) => { 
+      setArticulosDisponibles(response.data.contador)
+    })
+    .catch((error) => console.log(error))
+  }
+
+  useEffect(()=>{
+    loadInfo()
+    Redireccion()
   },[])
 
   return (
@@ -55,8 +88,8 @@ const Dashboard = () => {
                 </h5>
               </div>
               <div className="card-body d-flex flex-column p-3">
-                <span>Ventas por día: num</span>
-                <span>Total ingresos por día: num</span>
+                <span>Ventas por día: {ventasDia}</span>
+                <span>{`Total ingresos por día:  Bs. ${ingresosDia}`}</span>
               </div>
             </div>
 
@@ -67,7 +100,7 @@ const Dashboard = () => {
                 </h5>
               </div>
               <div className="card-body d-flex flex-column p-3">
-                <span>Artículos disponibles: num</span>
+                <span>Artículos disponibles: {articulosDisponibles}</span>
               </div>
             </div>
 
@@ -78,8 +111,7 @@ const Dashboard = () => {
                 </h5>
               </div>
               <div className="card-body d-flex flex-column p-3">
-                <span>Clientes registrados hoy: num</span>
-                <span>Total clientes registrados: num</span>
+                <span>Total clientes registrados: {totalClientes} </span>
               </div>
             </div>
           </div>

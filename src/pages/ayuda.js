@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import Sidebar from '../components/sidebar';
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 function Faq() {
   const [visibleAnswer, setVisibleAnswer] = useState(null);
@@ -11,6 +14,16 @@ function Faq() {
       setVisibleAnswer(index);
     }
   };
+
+  const Redireccion = () => {
+    if(!cookies.get('id')){
+      window.location.href="/login"
+    }
+  }
+
+  useEffect(()=>{
+    Redireccion()
+  },[])
 
   const faqs = [
     {

@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { DataFetching } from "../DataFetching";
 import "../assets/styles.scss";
 import jsPDF from 'jspdf';
 import image from '../assets/images/logo-gelato.png';
 import "../assets/imagenlogo.css";
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 function Plantilla() {
     const itemCliente = DataFetching(
@@ -16,6 +19,16 @@ function Plantilla() {
         const fullName = `${user.nombre}${user.cedula}`.toLowerCase();
         return fullName.includes(searchQuery.toLowerCase());
     });
+
+    const Redireccion = () => {
+      if (!cookies.get("id")) {
+        window.location.href = "/login";
+      }
+    };
+
+    useEffect(() => {
+      Redireccion();
+    }, []);
 
     const camposDataClientes = [
         {

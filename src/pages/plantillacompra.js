@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DataFetching } from "../DataFetching";
 import "../assets/styles.scss";
 import jsPDF from 'jspdf';
 import image from '../assets/images/logo-gelato.png';
 import "../assets/imagenlogo.css";
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 function Plantillacompra() {
     const itemCliente = DataFetching(
@@ -33,8 +36,18 @@ function Plantillacompra() {
         {
             column: "Proveedor",
         },
-        
+
     ];
+
+    const Redireccion = () => {
+        if (!cookies.get('id')) {
+            window.location.href = "/login"
+        }
+    }
+
+    useEffect(() => {
+        Redireccion()
+    }, [])
 
     /*************VALIDAR NOMBRE*******************/
 
@@ -73,7 +86,7 @@ function Plantillacompra() {
             <div id="cuerpo">
                 <div className="row p-4">
                     <div className="imagenbonitaparaformulario">
-                        <img src={image} alt="user-login" /* style={{ maxWidth: '100px', }} *//>
+                        <img src={image} alt="user-login" /* style={{ maxWidth: '100px', }} */ />
                     </div>
                     <h3>SysProp Gelato</h3>
                     <h5>Heladería GelatoEfrutta</h5>
@@ -82,7 +95,7 @@ function Plantillacompra() {
                     <div className="col-3"></div>
                     {/* <!-- Botón para abrir la ventana pop-up --> */}
                 </div>
-                <hr/>
+                <hr />
                 <div className="row m-4" id="supertabla">
                     <h3 className="mb-3">Compras registradas</h3>
                     <table id="tabla-clientes" className="table">
@@ -111,10 +124,10 @@ function Plantillacompra() {
                         </tbody>
                     </table>
                 </div>
-                
+
             </div>
             <button onClick={generatePDF} className="btn btn-success" id="botonplantilla">Descargar PDF</button>
-            </div>
+        </div>
     );
 }
 

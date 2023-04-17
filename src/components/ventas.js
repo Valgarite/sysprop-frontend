@@ -69,8 +69,6 @@ async function agregarVenta(ruta, nombre, cantidad, precio) {
   window.location.reload();
 }
 
-
-
 function Ventas() {
   const [show, setShow] = useState(false);
   const [productos, setProductos] = useState([]);
@@ -104,7 +102,6 @@ function Ventas() {
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
-  const handleEditar = () => setAction(2);
 
   useEffect(() => {
     const selectedProductObjects = productos.filter((producto) =>

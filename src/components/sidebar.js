@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie/cjs/Cookies";
+import icon1 from "../assets/images/user-icon-1.png"
 import icon2 from "../assets/images/user-icon-2.png"
+import icon3 from "../assets/images/user-icon-gt.png"
+import iconDef from "../assets/images/user-default.png"
 
 const cookies = new Cookies()
 
@@ -12,19 +15,19 @@ const Sidebar = () => {
 	const menuItems = [
 		{
 			text: "Inicio",
-			icon: "bx bx-collection",
+			icon: "bx bx-home",
 			path: "/dashboard",
 			minUserLevel: 1,
 		},
 		{
 			text: "Compras",
-			icon: "bx bx-collection",
+			icon: "bx bx-shopping-bag",
 			path: "/Compras",
 			minUserLevel: 2
 		},
 		{
 			text: "Ventas",
-			icon: "sbx bx-book-alt",
+			icon: "bx bx-store",
 			path: "/ventas",
 			minUserLevel: 1
 		},
@@ -42,43 +45,60 @@ const Sidebar = () => {
 		},
 		{
 			text: "Inventario",
-			icon: "bx bx-plug",
+			icon: "bx bx-book-content",
 			path: "/inventario",
 			minUserLevel: 2
 		},
 		{
 			text: "Usuarios",
-			icon: "bx bx-compass",
+			icon: "bx bxs-user-detail",
 			path: "/usuarios",
 			minUserLevel: 3
 		},
 		{
 			text: "Mantenimiento",
-			icon: "bx bx-history",
+			icon: "bx bx-key",
 			path: "/mantenimiento",
 			minUserLevel: 1
 		},
 		{
 			text: "Ayuda",
-			icon: "bx bx-history",
+			icon: "bx bx-help-circle",
 			path: "/ayuda",
 			minUserLevel: 1
 		},
 	];
 
+	const isAuth = (cookies.get('id')) ? true : false
+
 	const userData = {
-		username: cookies.get('username'),
-		nombre: cookies.get('nombre'),
-		idCargo: cookies.get('cargo').id,
-		cargo: cookies.get('cargo').nombre,
-		icon: icon2
-	};
+    username: isAuth ? cookies.get("username") : "noCurrentUser",
+    nombre: isAuth ? cookies.get("nombre") : "Nombre del Usuario",
+    idCargo: isAuth ? cookies.get("cargo").id : 0,
+    cargo: isAuth ? cookies.get("cargo").nombre : "Cargo",
+    icon: isAuth
+      ? cookies.get("cargo").id === 1
+        ? icon1
+        : cookies.get("cargo").id === 2
+        ? icon2
+        : cookies.get("cargo").id === 3
+        ? icon3
+        : iconDef
+      : iconDef
+  };
 
 	const [activeTab, setActiveTab] = useState("");
 
 	const cerrarSesion = () => {
 		cookies.remove('id', { path: "/" })
-		window.location.href = "/dashboard"
+		cookies.remove('nombre', { path: "/" })
+		cookies.remove('username', { path: "/" })
+		cookies.remove('cedula', { path: "/" })
+		cookies.remove('fechaNacimiento', { path: "/" })
+		cookies.remove('correo', { path: "/" })
+		cookies.remove('estadoActivo', { path: "/" })
+		cookies.remove('cargo', { path: "/" })
+		window.location.href = "/login"
 	}
 
 	return (
@@ -116,7 +136,7 @@ const Sidebar = () => {
 						(userData.idCargo >= minUserLevel) &&
 						<div className="menu-item-container">
 							<Link
-								className={isExpanded ? "menu-item" : "menu-item menu-item-NX"}
+								className={isExpanded ? "menu-item fw-semibold" : "menu-item menu-item-NX"}
 								to={path}
 								onMouseEnter={() => {
 									if (!isExpanded) {
@@ -133,7 +153,7 @@ const Sidebar = () => {
 								{isExpanded && <p> {text}</p>}
 							</Link>
 							{!isExpanded && activeTab === text && (
-								<div id="menu-item-name">{text}</div>
+								<div id="menu-item-name" className="hover-text">{text}</div>
 							)}
 						</div>
 					))}

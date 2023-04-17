@@ -13,9 +13,7 @@ import {
   Table, Button, Modal, ModalHeader, ModalBody, ModalFooter
 } from "reactstrap";
 
-
 const cookies = new Cookies()
-
 
 function Reportescompras() {
   const [modalData, setModalData] = useState(null);
@@ -47,19 +45,11 @@ function Reportescompras() {
     fetchData(idVenta);
   };
 
-  const toggleModal = () => {
-    setShowModal(!showModal);
-  };
-
-  
-
   function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
     return date.toLocaleDateString(undefined, options);
   }
-  
-  
 
   const fetchData = async (id) => {
     try {   

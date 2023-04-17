@@ -46,20 +46,6 @@ async function agregarCliente(ruta, nombre, cedula, telefono, direccion) {
   window.location.reload();
 }
 
-const eliminarCliente = async (id) => {
-  if (window.confirm("¿Está seguro de que desea eliminar este usuario?")) {
-    try {
-      await axios.delete(
-        `https://sysprop-production.up.railway.app/clientes/${id}`
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  window.location.reload();
-};
-
 const editarCliente = async (id, nombre, cedula, telefono, direccion) => {
   if (!nombre || !cedula || !telefono || !direccion) {
     alert("Todos los campos son obligatorios");

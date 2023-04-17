@@ -7,13 +7,12 @@
   position: fixed;
   height: 100vh;
   color: var(--light);
-
   transition: 0.4s;
 }
 
 .side-nav-container-NX {
   z-index: 1000;
-  width: 85px;
+  width: max-content;
 
   .hamburger-out {
     margin-left: 18px;
@@ -32,6 +31,11 @@
   grid-template-columns: 2fr 1fr;
   grid-template-rows: 1fr;
   height: 75px;
+}
+
+.hover-text {
+  left: 100px;
+  text-align: center;
 }
 
 .nav-brand {
@@ -157,6 +161,7 @@
 
 .menu-item-NX {
   margin: auto;
+  justify-content: center;
 
   .bx {
     padding: 0 20px;
@@ -166,6 +171,7 @@
   }
 }
 .menu-item:hover {
+  color: white;
   background-color: var(--primary);
 }
 .menu-item img {

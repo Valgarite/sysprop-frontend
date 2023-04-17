@@ -73,8 +73,6 @@ async function agregarVenta(idUsuario, idCliente, listaArticulos, listaCantidade
   }
 }
 
-
-
 var actualCliente = {
   nombre: "Nombre de cliente",
   cedula: "",
@@ -113,7 +111,14 @@ function Ventas() {
   const handleConfirm = () => setConfirmarVenta(true);
   const handleConfirmClose = () => setConfirmarVenta(false);
 
+  const Redireccion = () => {
+    if(!cookies.get('id')){
+      window.location.href="/login"
+    }
+  }
+
   useEffect(() => {
+    Redireccion()
     axios
       .get("https://sysprop-production.up.railway.app/Articulos")
       .then((response) => {
@@ -130,8 +135,6 @@ function Ventas() {
         setClientes(data);
       })
   }, []);
-
-
 
   const [action, setAction] = useState(1); // El estado 1 define que el Modal será utilizado para Agregar un cliente
   const handleAgregar = () => setAction(1);
@@ -164,7 +167,6 @@ function Ventas() {
       if (checked) {
         // Checkbox is checked, add product to selected products
         const productoSeleccionado = productos.find((p) => p.id === productId);
-        const cantidad = productoSeleccionado.cantidad || 1
         const newDetalleProductos = [
           ...detalleProductos,
           { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad, disable: false },
@@ -282,7 +284,7 @@ function Ventas() {
       <div>
         <div id="cuerpo">
           <div className="m-4 row">
-            <h3>Registro de venta</h3>
+            <h3>Registrar venta</h3>
             <div className="hijueputabton">
               <Link to="/reportes"><Button color="primary">Visualizar Ventas</Button></Link>
             </div>
@@ -385,7 +387,7 @@ function Ventas() {
                                     <FormGroup>
                                     <Input
                                         maxLength={2}
-                                        type="text"
+                                        type="number"
                                         defaultValue={producto.cantidad}
                                         onChange={(e) => {
                                           const newValue = e.target.value;
@@ -490,8 +492,9 @@ function Ventas() {
                                   </tr>
                                 ))}
                                 <tr>
-                                  <td>Total:</td>
-                                  <td>{total}</td>
+                                  <td className="fw-semibold">Total:</td>
+                                  <td></td>
+                                  <td className="fw-semibold">{"Bs. "+total}</td>
                                 </tr>
                               </tbody>
                             </Table>
