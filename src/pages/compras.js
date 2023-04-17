@@ -108,10 +108,14 @@ function Compras() {
   const [busqueda, setBusqueda] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [total, setTotal] = useState(0);
+  const [showModal, setShowModal] = useState(false)
   const [confirmarVenta, setConfirmarVenta] = useState(false)
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [nombreCliente, setNombreCliente] = useState(null);
   const Utensilios = "Utensilios";
 
   const handleSelectChange = (selectedOption) => {
+    setSelectedOption(selectedOption);
     document.getElementById('rif').value = selectedOption.value;
     actualCliente = clientes.find(function (cliente) {
       return cliente.rif === selectedOption.value
@@ -125,21 +129,18 @@ function Compras() {
   const [direccion, setDireccion] = useState("");
 
   const [detalleProductos, setDetalleProductos] = useState([]);
+  const [cantidadesProductos, setCantidadesProductos] = useState([])
   const [clientes, setClientes] = useState([])
 
+  const handleModalSeleccionar = () => setShowModal(true);
+  const handleModalAgregar = () => setShowModal(2);
+  const closeModal = () => setShowModal(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleConfirm = () => setConfirmarVenta(true);
   const handleConfirmClose = () => setConfirmarVenta(false);
 
-  const Redireccion = () => {
-    if(!cookies.get('id')){
-      window.location.href="/login"
-    }
-  }
-
   useEffect(() => {
-    Redireccion()
     axios
       .get("https://sysprop-production.up.railway.app/Articulos")
       .then((response) => {
@@ -172,16 +173,17 @@ function Compras() {
       0
     );
     setTotal(total);
-  }, [selectedProducts, productos]);
+  }, [selectedProducts, productos, handleSelectChange]);
 
   const handleCheck = (productId, checked) => {
   setSelectedProducts((prevSelectedProducts) => {
     if (checked) {
       // Checkbox is checked, add product to selected products
       const productoSeleccionado = productos.find((p) => p.id === productId);
+      const cantidad = productoSeleccionado.cantidad || 1
       const newDetalleProductos = [
         ...detalleProductos,
-        { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad, disable: false },
+        { ...productoSeleccionado, cantidad: cantidad, disable: false },
       ];
       setDetalleProductos(newDetalleProductos);
 
@@ -261,12 +263,13 @@ function Compras() {
   /******************************************/
   const preConfirmar = async () => {
     if ((actualCliente.id > 0) && (detalleProductos.length > 0)) {
-      detalleProductos.map((producto) => {
-        articulosSeleccionados.push(producto.nombre);
-        articulosCantidades.push(parseInt(producto.cantidad));
-        return 0
-      });
-      handleConfirm(); // Redirecciona al Modal de Confirmación
+      {
+        detalleProductos.map((producto) => {
+          articulosSeleccionados.push(producto.nombre)
+          articulosCantidades.push(parseInt(producto.cantidad))
+        })
+      }
+      handleConfirm() // Redirecciona al Modal de Confirmación
     } else if (actualCliente.id === 0) {
       alert("Se debe seleccionar un Proveedor")
     } else if (detalleProductos.length === 0) {
@@ -290,7 +293,7 @@ function Compras() {
             <Col sm={8}>
               <Row className="mb-2 mt-5">
                 <Col sm={12}>
-                  <Card className="cliente-card">
+                  <Card>
                     <CardHeader
                       style={{ backgroundColor: "#4e73df", color: "white" }}
                     >
@@ -336,7 +339,7 @@ function Compras() {
               </Row>
               <Row>
                 <Col sm={12}>
-                  <Card className="productos-card">
+                  <Card>
                     <CardHeader
                       style={{ backgroundColor: "#4e73df", color: "white" }}
                     >
@@ -383,7 +386,7 @@ function Compras() {
                                   <td>
                                     <FormGroup>
                                       <Input
-                                        maxLength={2}
+                                        maxLength={8}
                                         type="text"
                                         defaultValue={producto.cantidad}
                                         onChange={(e) => {
@@ -391,7 +394,7 @@ function Compras() {
 
                                           if (
                                             selectedProducts.includes(producto.id) &&
-                                            (newValue === "" || newValue > 1)
+                                            (newValue === "" || newValue >= 1)
                                           ) {
                                             const nuevosProductos = [...productos];
                                             const index = nuevosProductos.indexOf(producto);
@@ -466,7 +469,7 @@ function Compras() {
                         <CardHeader
                           style={{ backgroundColor: "#4e73df", color: "white" }}
                         >
-                          Detalles de Compra
+                          Detalle
                         </CardHeader>
                         <CardBody>
                           <Row>
@@ -486,9 +489,8 @@ function Compras() {
                                     </tr>
                                   ))}
                                   <tr>
-                                    <td className="fw-semibold">Total:</td>
-                                    <td></td>
-                                    <td className="fw-semibold">{"Bs. "+total}</td>
+                                    <td>Total:</td>
+                                    <td>{total}</td>
                                   </tr>
                                 </tbody>
                               </Table>
@@ -525,7 +527,7 @@ function Compras() {
           onHide={handleConfirmClose}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Confirmación de Compra</Modal.Title>
+            <Modal.Title>Confirmación de Venta</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="d-flex flex-column">

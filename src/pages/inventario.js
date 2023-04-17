@@ -25,6 +25,11 @@ function Inventario() {
   const [usuarios, setUsuarios] = useState([]);
   const [modal, setModal] = useState(false);
 
+  const [isEdit, setIsEdit] = useState(false);
+  const handleEdit = () => {
+    setIsEdit(true)
+  }
+
   const toggle = () => {
     setModal(!modal);
     if (modal === false) {
@@ -69,6 +74,7 @@ function Inventario() {
   };
 
   const editarClick = (user) => {
+    setIsEdit()
     setSelectedUser(user);
     toggle();
 
@@ -205,7 +211,9 @@ function Inventario() {
       </div>
 
       <Modal className="mt-5" isOpen={modal} size="xl" centered toggle={toggle}>
-        <ModalHeader toggle={toggle}>Agregar Nuevo Articulo</ModalHeader>
+        <ModalHeader toggle={toggle}>
+           {isEdit ? "Agregar Nuevo Artículo" : "Editar Artículo"} 
+        </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit} className="row g-3">
             <div className="col-md-6">
