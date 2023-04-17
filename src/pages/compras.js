@@ -525,7 +525,7 @@ function Compras() {
           onHide={handleConfirmClose}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Confirmación de Venta</Modal.Title>
+            <Modal.Title>Confirmación de Compra</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="d-flex flex-column">
