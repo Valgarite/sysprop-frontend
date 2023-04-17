@@ -164,29 +164,37 @@ function Ventas() {
       if (checked) {
         // Checkbox is checked, add product to selected products
         const productoSeleccionado = productos.find((p) => p.id === productId);
+        const cantidad = productoSeleccionado.cantidad || 1
         const newDetalleProductos = [
           ...detalleProductos,
-          { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad },
+          { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad, disable: false },
         ];
         setDetalleProductos(newDetalleProductos);
-
+  
         const nuevosDetalles = [...detalleProductos];
         const detalleIndex = nuevosDetalles.findIndex((p) => p.id === productoSeleccionado.id);
         if (detalleIndex !== -1) {
           nuevosDetalles[detalleIndex].cantidad = productoSeleccionado.cantidad;
         } else {
-          nuevosDetalles.push({ ...productoSeleccionado, cantidad: productoSeleccionado.cantidad });
+          nuevosDetalles.push({ ...productoSeleccionado, cantidad: productoSeleccionado.cantidad, disable: false });
         }
         setDetalleProductos(nuevosDetalles);
         return [...prevSelectedProducts, productId];
       } else {
         // Checkbox is unchecked, remove product from selected products
-        const newDetalleProductos = detalleProductos.filter((p) => p.id !== productId);
+        const newDetalleProductos = detalleProductos.filter((p) => {
+          if (p.id === productId) {
+            return false;
+          }
+          return true;
+        });
         setDetalleProductos(newDetalleProductos);
         return prevSelectedProducts.filter((id) => id !== productId);
       }
     });
   };
+  
+  
 
   const productosFiltrados = productos.filter((producto) =>
     producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
@@ -375,20 +383,17 @@ function Ventas() {
                                   <td>{producto.nombre}</td>
                                   <td>
                                     <FormGroup>
-                                      <Input
-                                        className="inputProductos"
+                                    <Input
                                         maxLength={2}
-                                        disabled={!selectedProducts.includes(producto.id)}
-                                        type="number"
-                                        defaultValue={0}
+                                        type="text"
+                                        defaultValue={producto.cantidad}
                                         onChange={(e) => {
                                           const newValue = e.target.value;
 
                                           if (
                                             selectedProducts.includes(producto.id) &&
-                                            (newValue === "" || newValue >= 1)
+                                            (newValue === "" || newValue > 1)
                                           ) {
-                                            handleCheck(producto.id, true)
                                             const nuevosProductos = [...productos];
                                             const index = nuevosProductos.indexOf(producto);
                                             nuevosProductos[index] = {
@@ -412,13 +417,15 @@ function Ventas() {
                                             setDetalleProductos(nuevosDetalles);
                                           } else {
                                             // Si el valor ingresado no es una cadena vacía o mayor a 1, se asigna el valor 1 al input
-                                            handleCheck(producto.id, false)
                                             e.target.value = 1;
                                           }
                                         }}
                                         onKeyDown={(e) => {
+                                          if (e.key.toLowerCase() === "e") {
+                                            e.preventDefault();
+                                          }
                                           // Se valida que no se escriba el símbolo "-"
-                                          if ((e.key === "-") || (e.key === "")) {
+                                          if (e.key === "-") {
                                             e.preventDefault();
                                           }
                                           // Expresión regular para validar si el valor ingresado cumple con la condición de permitir el número 0 solo si está seguido por otro número
@@ -427,8 +434,10 @@ function Ventas() {
                                             e.preventDefault();
                                           }
                                         }}
+                                        disabled={!selectedProducts.includes(producto.id)}
 
                                       />
+
 
                                     </FormGroup>
                                   </td>
@@ -455,7 +464,7 @@ function Ventas() {
 
             <Col sm={4} className="detalle-venta-col">
               <div className="sticky-top">
-                <Row className="mb-2 mx-2">
+              <Row className="mb-2 mx-2">
                   <Col sm={12}>
                     <Card className="detalle-venta">
                       <CardHeader
@@ -471,22 +480,18 @@ function Ventas() {
                                 <tr>
                                   <td className="fw-semibold">Artí­culo</td>
                                   <td className="fw-semibold">Cantidad</td>
-                                  <td className="fw-semibold">Precio Unit.</td>
-                                  <td className="fw-semibold">Precio total</td>
+                                  <td className="fw-semibold">Precio</td>
                                 </tr>
                                 {detalleProductos.map((producto) => (
                                   <tr key={producto.id}>
                                     <td>{producto.nombre}</td>
-                                    <td className="columna-numerica">{producto.cantidad || 1}</td>
-                                    <td className="columna-numerica">{producto.precio}</td>
-                                    <td className="columna-numerica">{(producto.cantidad || 1) * producto.precio}</td>
+                                    <td>{producto.cantidad}</td>
+                                    <td>{producto.precio}</td>
                                   </tr>
                                 ))}
                                 <tr>
-                                  <td className="fw-semibold">Total:</td>
-                                  <td className></td>
-                                  <td className></td>
-                                  <td className="fw-semibold">{"Bs. " + total}</td>
+                                  <td>Total:</td>
+                                  <td>{total}</td>
                                 </tr>
                               </tbody>
                             </Table>
@@ -515,6 +520,7 @@ function Ventas() {
               </div>
             </Col>
           </Row>
+              
         </div>
 
         {/* MODAL DE CONFIRMAR VENTA */}

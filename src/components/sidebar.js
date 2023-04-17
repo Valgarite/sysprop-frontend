@@ -56,7 +56,7 @@ const Sidebar = () => {
 			text: "Mantenimiento",
 			icon: "bx bx-history",
 			path: "/mantenimiento",
-			minUserLevel: 3
+			minUserLevel: 1
 		},
 		{
 			text: "Ayuda",
@@ -74,11 +74,11 @@ const Sidebar = () => {
 		icon: icon2
 	};
 
-
+	const [activeTab, setActiveTab] = useState("");
 
 	const cerrarSesion = () => {
-		cookies.remove('id', {path: "/"})
-		window.location.href="/dashboard"
+		cookies.remove('id', { path: "/" })
+		window.location.href = "/dashboard"
 	}
 
 	return (
@@ -91,7 +91,7 @@ const Sidebar = () => {
 			}
 		>
 			<div className="nav-upper">
-				<div className= "nav-heading">
+				<div className="nav-heading">
 					{isExpanded && (
 						<div className="nav-brand">
 							<img src="icons/Logo.svg" alt="Logo" srcset="" />
@@ -114,13 +114,28 @@ const Sidebar = () => {
 				<div className="nav-menu">
 					{menuItems.map(({ text, icon, path, minUserLevel }) => (
 						(userData.idCargo >= minUserLevel) &&
-						<Link
-							className={isExpanded ? "menu-item" : "menu-item menu-item-NX"}
-							to={path}
-						>
-							<i className={icon}/>
-							{isExpanded && <p> {text}</p>}
-						</Link>
+						<div className="menu-item-container">
+							<Link
+								className={isExpanded ? "menu-item" : "menu-item menu-item-NX"}
+								to={path}
+								onMouseEnter={() => {
+									if (!isExpanded) {
+										setActiveTab(text);
+									}
+								}}
+								onMouseLeave={() => {
+									if (!isExpanded) {
+										setActiveTab("");
+									}
+								}}
+							>
+								<i className={icon} />
+								{isExpanded && <p> {text}</p>}
+							</Link>
+							{!isExpanded && activeTab === text && (
+								<div id="menu-item-name">{text}</div>
+							)}
+						</div>
 					))}
 				</div>
 			</div>
@@ -134,10 +149,10 @@ const Sidebar = () => {
 						/>
 						<div className="nav-footer-info">
 							<p className="nav-footer-user-name">
-								{ isUserAuthenticated ? userData.nombre : "Usuario Actual" }
+								{isUserAuthenticated ? userData.nombre : "Usuario Actual"}
 							</p>
 							<p className="nav-footer-user-position">
-								{ isUserAuthenticated ? userData.cargo : "Cargo" }
+								{isUserAuthenticated ? userData.cargo : "Cargo"}
 							</p>
 						</div>
 					</div>
@@ -146,6 +161,7 @@ const Sidebar = () => {
 					<img className="logout-icon" src="icons/logout.svg" alt="" srcset="" />
 				</Link>
 			</div>
+
 		</div>
 	);
 };

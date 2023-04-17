@@ -33,7 +33,7 @@ function Login() {
         },
       })
       .then((response) => {
-        response.data.map((usuario, id) => {
+        response.data.map((usuario) => {
           if(usuario.username === username && usuario.password===password){
             isAuth = true
             cookies.set('id', usuario.id, {path: "/"})

@@ -16,6 +16,8 @@ import {
 } from "reactstrap";
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
+import { Link } from 'react-router-dom';
+
 
 const cookies = new Cookies()
 
@@ -66,15 +68,16 @@ async function agregarProveedor(
     })
     .then((res) => console.log("posting data", res))
     .catch((err) => console.log(err));
+    alert("Cliente registrado");
 
   window.location.reload();
 }
 
-async function agregarVenta(idUsuario, idCliente, listaArticulos, listaCantidades) {
+async function agregarVenta(idusuario, idproveedor, listaArticulos, listaCantidades) {
   try {
-    await axios.post("https://sysprop-production.up.railway.app/ventas/registrar", {
-      idusuario: idUsuario,
-      idcliente: idCliente,
+    await axios.post("https://sysprop-production.up.railway.app/compras/registrar", {
+      idusuario: idusuario,
+      idproveedor: idproveedor,
       articulos: listaArticulos,
       cantidades: listaCantidades,
     });
@@ -142,6 +145,7 @@ function Compras() {
       .get("https://sysprop-production.up.railway.app/Articulos")
       .then((response) => {
         setProductos(response.data);
+
       })
       .catch((error) => {
         console.log(error);
@@ -172,34 +176,39 @@ function Compras() {
   }, [selectedProducts, productos, handleSelectChange]);
 
   const handleCheck = (productId, checked) => {
-    setSelectedProducts((prevSelectedProducts) => {
-      if (checked) {
-        // Checkbox is checked, add product to selected products
-        const productoSeleccionado = productos.find((p) => p.id === productId);
-        const cantidad = productoSeleccionado.cantidad || 1
-        const newDetalleProductos = [
-          ...detalleProductos,
-          { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad },
-        ];
-        setDetalleProductos(newDetalleProductos);
+  setSelectedProducts((prevSelectedProducts) => {
+    if (checked) {
+      // Checkbox is checked, add product to selected products
+      const productoSeleccionado = productos.find((p) => p.id === productId);
+      const cantidad = productoSeleccionado.cantidad || 1
+      const newDetalleProductos = [
+        ...detalleProductos,
+        { ...productoSeleccionado, cantidad: productoSeleccionado.cantidad, disable: false },
+      ];
+      setDetalleProductos(newDetalleProductos);
 
-        const nuevosDetalles = [...detalleProductos];
-        const detalleIndex = nuevosDetalles.findIndex((p) => p.id === productoSeleccionado.id);
-        if (detalleIndex !== -1) {
-          nuevosDetalles[detalleIndex].cantidad = productoSeleccionado.cantidad;
-        } else {
-          nuevosDetalles.push({ ...productoSeleccionado, cantidad: productoSeleccionado.cantidad });
-        }
-        setDetalleProductos(nuevosDetalles);
-        return [...prevSelectedProducts, productId];
+      const nuevosDetalles = [...detalleProductos];
+      const detalleIndex = nuevosDetalles.findIndex((p) => p.id === productoSeleccionado.id);
+      if (detalleIndex !== -1) {
+        nuevosDetalles[detalleIndex].cantidad = productoSeleccionado.cantidad;
       } else {
-        // Checkbox is unchecked, remove product from selected products
-        const newDetalleProductos = detalleProductos.filter((p) => p.id !== productId);
-        setDetalleProductos(newDetalleProductos);
-        return prevSelectedProducts.filter((id) => id !== productId);
+        nuevosDetalles.push({ ...productoSeleccionado, cantidad: productoSeleccionado.cantidad, disable: false });
       }
-    });
-  };
+      setDetalleProductos(nuevosDetalles);
+      return [...prevSelectedProducts, productId];
+    } else {
+      // Checkbox is unchecked, remove product from selected products
+      const newDetalleProductos = detalleProductos.filter((p) => {
+        if (p.id === productId) {
+          return false;
+        }
+        return true;
+      });
+      setDetalleProductos(newDetalleProductos);
+      return prevSelectedProducts.filter((id) => id !== productId);
+    }
+  });
+};
 
 
 
@@ -262,7 +271,7 @@ function Compras() {
       }
       handleConfirm() // Redirecciona al Modal de Confirmación
     } else if (actualCliente.id === 0) {
-      alert("Se debe seleccionar un cliente")
+      alert("Se debe seleccionar un Proveedor")
     } else if (detalleProductos.length === 0) {
       alert("No se han seleccionado articulos ")
     }
@@ -277,7 +286,7 @@ function Compras() {
           <div className="m-4 row">
             <h3>Registrar compra</h3>
             <div className="col-6">
-              <Button color="primary">Visualizar Compras</Button>
+              <Link to="/reportescompras"><Button color="primary">Visualizar Compras</Button></Link>
             </div>
           </div>
           <Row>
@@ -366,6 +375,7 @@ function Compras() {
                                 <tr key={producto.id}>
                                   <td>
                                     <Input
+                                    
                                       type="checkbox"
                                       bsSize="md"
                                       checked={selectedProducts.includes(producto.id)}
@@ -376,7 +386,7 @@ function Compras() {
                                   <td>
                                     <FormGroup>
                                       <Input
-                                        maxLength={8}
+                                        maxLength={2}
                                         type="text"
                                         defaultValue={producto.cantidad}
                                         onChange={(e) => {
@@ -413,6 +423,9 @@ function Compras() {
                                           }
                                         }}
                                         onKeyDown={(e) => {
+                                          if (e.key.toLowerCase() === "e") {
+                                            e.preventDefault();
+                                          }
                                           // Se valida que no se escriba el símbolo "-"
                                           if (e.key === "-") {
                                             e.preventDefault();
@@ -423,6 +436,7 @@ function Compras() {
                                             e.preventDefault();
                                           }
                                         }}
+                                        disabled={!selectedProducts.includes(producto.id)}
 
                                       />
 
@@ -449,62 +463,62 @@ function Compras() {
 
             <Col sm={4} className="detalle-venta">
               <div className="sticky-top">
-                <Row className="mb-2 mx-2">
-                  <Col sm={12}>
-                    <Card className="detalle-venta">
-                      <CardHeader
-                        style={{ backgroundColor: "#4e73df", color: "white" }}
-                      >
-                        Detalle
-                      </CardHeader>
-                      <CardBody>
-                        <Row>
-                          <Col sm={12}>
-                            <Table size="sm">
-                              <tbody>
-                                <tr>
-                                  <td className="fw-semibold">Artí­culo</td>
-                                  <td className="fw-semibold">Cantidad</td>
-                                  <td className="fw-semibold">Precio</td>
-                                </tr>
-                                {detalleProductos.map((producto) => (
-                                  <tr key={producto.id}>
-                                    <td>{producto.nombre}</td>
-                                    <td>{producto.cantidad}</td>
-                                    <td>{producto.precio}</td>
+                  <Row className="mb-2 mx-2">
+                    <Col sm={12}>
+                      <Card className="detalle-venta">
+                        <CardHeader
+                          style={{ backgroundColor: "#4e73df", color: "white" }}
+                        >
+                          Detalle
+                        </CardHeader>
+                        <CardBody>
+                          <Row>
+                            <Col sm={12}>
+                              <Table size="sm">
+                                <tbody>
+                                  <tr>
+                                    <td className="fw-semibold">Artí­culo</td>
+                                    <td className="fw-semibold">Cantidad</td>
+                                    <td className="fw-semibold">Precio</td>
                                   </tr>
-                                ))}
-                                <tr>
-                                  <td>Total:</td>
-                                  <td>{total}</td>
-                                </tr>
-                              </tbody>
-                            </Table>
-                          </Col>
-                        </Row>
-                        <Row className="mx-2">
-                          <Col sm={12}>
-                            <Card>
-                              <CardBody>
-                                <Button
-                                  color="success"
-                                  block
-                                  onClick={preConfirmar}
-                                >
-                                  <i className="fas fa-money-check"></i>{" "}
-                                  Registrar Venta
-                                </Button>
-                              </CardBody>
-                            </Card>
-                          </Col>
-                        </Row>
-                      </CardBody>
-                    </Card>
-                  </Col>
-                </Row>
-              </div>
-            </Col>
-          </Row>
+                                  {detalleProductos.map((producto) => (
+                                    <tr key={producto.id}>
+                                      <td>{producto.nombre}</td>
+                                      <td>{producto.cantidad}</td>
+                                      <td>{producto.precio}</td>
+                                    </tr>
+                                  ))}
+                                  <tr>
+                                    <td>Total:</td>
+                                    <td>{total}</td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+                            </Col>
+                          </Row>
+                          <Row className="mx-2">
+                            <Col sm={12}>
+                              <Card>
+                                <CardBody>
+                                  <Button
+                                    color="success"
+                                    block
+                                    onClick={preConfirmar}
+                                  >
+                                    <i className="fas fa-money-check"></i>{" "}
+                                    Registrar Compra
+                                  </Button>
+                                </CardBody>
+                              </Card>
+                            </Col>
+                          </Row>
+                        </CardBody>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
+              </Col>
+            </Row>
         </div>
 
         <Modal
@@ -584,7 +598,7 @@ function Compras() {
         <Modal className="modalAgregarUsuario" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            {action === 1 ? "Agregar cliente" : "Modificar cliente"}
+            {action === 1 ? "Agregar Proveedor" : "Modificar cliente"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -695,4 +709,4 @@ function Compras() {
   );
 }
 
-export { Compras }
+export default Compras

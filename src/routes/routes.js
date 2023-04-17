@@ -1,6 +1,6 @@
 import { Dashboard } from "../pages/dashboard";
 import Clientes from "../pages/clientes";
-import { Compras } from "../pages/compras";
+import  Compras from "../pages/compras";
 import Ayuda from "../pages/ayuda";
 import Ventas from "../pages/ventas";
 import Usuarios from "../pages/usuarios";
@@ -10,6 +10,8 @@ import Mantenimiento from "../pages/mantenimiento";
 import { Login } from "../pages/Login";
 import Reportes from "../pages/reportes";
 import Plantilla from "../pages/plantilla";
+import Plantillacompra from "../pages/plantillacompra";
+import Reportescompras from "../pages/reportescompras";
 
 
 const routes = [
@@ -72,12 +74,25 @@ const routes = [
       title: 'Plantilla',
       path: '/Plantilla',
       component: Plantilla,
+
+    },
+
+    {
+      title: 'Plantilla compra',
+      path: '/plantillacompra',
+      component: Plantillacompra,
+    },
+    {
+      title: 'Reportes Compras',
+      path: '/reportescompras',
+      component: Reportescompras
     },
     {
       title: 'Home',
       path: '/',
-      component: Login
-    }
+      component: Login,
+    },
+    
   ];
   
   export default routes;

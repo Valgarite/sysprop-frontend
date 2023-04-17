@@ -8,7 +8,6 @@ function DataFetching(ruta){
 
     axios.get(ruta)
     .then(res=>{
-        console.log(res)
         setPosts(res.data)
     })
     .catch(err=>{
