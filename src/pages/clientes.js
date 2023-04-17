@@ -325,8 +325,7 @@ function Clientes() {
                   //onChange={(event) => setCedula(event.target.value)}
                   onChange={validarCedula}
                   required
-                  // maxLength={8}
-                  minLength={8}
+                  minLength={7}
                 />
               </div>
               <div className="col-md-6">

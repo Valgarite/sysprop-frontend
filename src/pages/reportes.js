@@ -4,12 +4,23 @@ import "../assets/styles.scss";
 import Sidebar from "../components/sidebar";
 import Cookies from "universal-cookie";
 import { Link } from 'react-router-dom';
-import { Button } from "reactstrap";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Col,
+  Row,
+  Table, Button, Modal, ModalHeader, ModalBody, ModalFooter
+} from "reactstrap";
+
 
 const cookies = new Cookies()
 
 
 function Reportes() {
+  const [modalData, setModalData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
   const itemCliente = DataFetching(
     "https://sysprop-production.up.railway.app/ventas"
   );
@@ -29,6 +40,33 @@ function Reportes() {
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
+  };
+
+  const handleModal = (idVenta) => {
+    setShowModal(true);
+    fetchData(idVenta);
+  };
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  }
+  
+  
+
+  const fetchData = async (idVenta) => {
+    try {
+      const response = await fetch(
+        `https://sysprop-production.up.railway.app/ventas/detalles/${idVenta}`
+      );
+      const data = await response.json();
+      setModalData(data);
+      const preciosUsados = data.preciosUsados.split("-");
+      setModalData({ ...data, preciosUsados })
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -75,7 +113,7 @@ function Reportes() {
             />
           </div>
           <div className="col-3"></div>
-          {/* <!-- Botón para abrir la ventana pop-up --> */}
+          {/* <!-- BotÃ³n para abrir la ventana pop-up --> */}
         </div>
         <div className="hijueputabton">
           <Link to="/plantilla"><Button color="primary">Visualizar PDF</Button></Link>
@@ -98,14 +136,16 @@ function Reportes() {
                     <td className={itemCliente.estado_activo ? "activo" : "desactivo"}>
                       {itemCliente.id}
                     </td>
-                    <td>{itemCliente.fechaCreacion}</td>
-                    <td>{itemCliente.total}</td>
+                    <td>{formatDate(itemCliente.fechaCreacion)}</td>
+                    <td>{"Bs. " +itemCliente.total}</td>
                     <td>{itemCliente.idusuario.nombre}</td>
                     <td>{itemCliente.idcliente.nombre}</td>
                     <td>
                       <button
-                        className="btn btn-primary"
+                        className="btn btn-success"
                         id="btnEditar"
+
+                        onClick={() => handleModal(itemCliente.id)}
                       >
                         Visualizar Venta
                       </button>
@@ -114,13 +154,69 @@ function Reportes() {
                 ))}
             </tbody>
           </table>
+
+
         </div>
       </div>
 
+     
+
+      <Modal className="Modal-SeleccionarCliente" isOpen={showModal} toggle={() => setShowModal(false)}>
+        <ModalHeader toggle={() => setShowModal(false)}>Detalles de la Venta</ModalHeader>
+        <ModalBody>
+       
+          <Card className="detalle-venta">
+            <CardHeader style={{ backgroundColor: "#4e73df", color: "white" }}>Detalles</CardHeader>
+            <CardBody>
+              <Row>
+                <Col sm={12}>
+                  <Table size="sm">
+
+                    <tbody>
+                      <tr>
+                      </tr>
+                      <tr>
+                        <td>Fecha y hora:</td>
+                        <td>{modalData ? modalData.fecha : ""}</td>
+                      </tr>
+                      <tr>
+                        <td>Nombre del Cliente:</td>
+                        <td>{modalData ? modalData.nombreCliente : ""}</td>
+                      </tr>
+                      <tr>
+                        <td>Nombre del Usuario:</td>
+                        <td>{modalData ? modalData.nombreUsuario : ""}</td>
+                      </tr>
+                      <tr>
+                        <td>Articulos Usados:</td>
+                        <td>{modalData ? modalData.nombresRegistro.join(" | ") : ","}</td>
+                      </tr>
+                      <tr>
+                        <td>Precios Usados:</td>
+                        <td>{modalData ? modalData.preciosUsados.join(" | ") : ","}</td>
+                      </tr>
+                      <tr>
+                        <td>Total:</td>
+                        <td>{modalData ? "Bs. " + modalData.total : "Bs"}</td>
+                      </tr>
+                      <tr>
+
+                      </tr>
+                    </tbody>
+
+                  </Table>
+                </Col>
+              </Row>
+            </CardBody>
+          </Card>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={() => setShowModal(false)}>Cerrar</Button>
+        </ModalFooter>
+      </Modal>
 
     </div>
   );
 }
 
 export default Reportes;
-
